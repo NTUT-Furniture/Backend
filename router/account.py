@@ -10,13 +10,9 @@ router = APIRouter()
     status.HTTP_200_OK: {
         "model": modelExample
     },
-    })
+})
 async def get_account():
-    return JSONResponse(content={"status": "success", "message": "Hello World"}
-                        )
-
-
-# id: int
-#     name: str
-#     email: str
-#     password: str
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"status": "success", "message": "Hello World"}
+)
