@@ -2,4 +2,4 @@ fastapi
 fastapi-csrf-protect
 pydantic
 uvicorn
-sqlalchemy
+mysql-connector-python
