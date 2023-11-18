@@ -2,19 +2,32 @@ import mysql.connector
 import json
 
 def read_default(COLUMNS: str, TABLES: str, CONDITION: str):
-    with open('../core/dbInfo.json') as json_file:
-        config = json.load(json_file)
-        # config['raise_on_warnings'] = bool(config['raise_on_warnings'])
-        print(config)
-        cnx = mysql.connector.connect(**config)
-        cursor = cnx.cursor()
-        sql = "SELECT " + COLUMNS + " FROM " + TABLES
-        if CONDITION:
-        	sql += " WHERE " + CONDITION
-        query = (sql)
-        cursor.execute(query)
-        for column in cursor:
-            print(column)
-    cnx.close()
+    try:
+        with open('../core/dbInfo.json') as json_file:
+            config = json.load(json_file)
+            # config['raise_on_warnings'] = bool(config['raise_on_warnings'])
+            # print(config)
+            with mysql.connector.connect(**config) as cnx:
+                cursor = cnx.cursor()
+                sql = f"SELECT {COLUMNS} FROM {TABLES}"
+                if CONDITION:
+                    sql += f" WHERE {CONDITION}"
 
-read_default("email, credit_card", "Account", "")
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                return result
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+# Example usage:
+# columns = "*"
+# tables = "Account"
+# condition = ""
+# result = read_default("email, credit_card", "Account", "")
+# for row in result:
+#     print(row)
+# result = read_default(columns, tables, condition)
+# print(result)
+# for row in result:
+#     print (row)
