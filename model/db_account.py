@@ -1,39 +1,36 @@
-import mysql.connector
-import json
 import crud
 
 def get_all_column_from_account():
-    # with open('../core/dbInfo.json') as json_file:
-    #     config = json.load(json_file)
-    #     # config['raise_on_warnings'] = bool(config['raise_on_warnings'])
-    #     print(config)
-    #     cnx = mysql.connector.connect(**config)
-    #     cursor = cnx.cursor()
-    #     query = ("SELECT * FROM Account")
-    #     cursor.execute(query)
-    #     for column in cursor:
-    #         print(column)
-    # cnx.close()
-    result = crud.read_default("*", "Account", "")
+    result = crud.read_default("*", "`Account`", "")
     return result
 
-def get_excepted_columns_from_account(COLUMNS: str):
-    # with open('../core/dbInfo.json') as json_file:
-    #     config = json.load(json_file)
-    #     # config['raise_on_warnings'] = bool(config['raise_on_warnings'])
-    #     print(config)
-    #     cnx = mysql.connector.connect(**config)
-    #     cursor = cnx.cursor()
-    #     sql = "SELECT " + COLUMNS + " FROM Account"
-    #     query = (sql)
-    #     cursor.execute(query)
-    #     for column in cursor:
-    #         print(column)
-    # cnx.close()
-    result = crud.read_default(COLUMNS, "Account", "")
+def get_excepted_columns_from_account(COLUMNS: str, CONDITIONS: str):
+    result = crud.read_default(COLUMNS, "`Account`", CONDITIONS)
     return result
+
+def get_account_avator(ID: str):
+    CONDITION = ""
+    if ID != "":
+        CONDITION += f"account_uuid='{ID}'"
+    return get_excepted_columns_from_account("image_url", CONDITION)
+
+def get_account_setting(ID: str):
+    CONDITION = ""
+    if ID != "":
+        CONDITION += f"account_uuid='{ID}'"
+    COLUMNS = "name, email, phone, city, district, street, alley, floor, birthday"
+    return get_excepted_columns_from_account(COLUMNS, CONDITION)
+
+def get_user_name(ID: str):
+    CONDITION = ""
+    if ID != "":
+        CONDITION += f"account_uuid='{ID}'"
+    return get_excepted_columns_from_account("name", CONDITION)
 
 a = get_all_column_from_account()
+print('all')
 print(a)
-b = get_excepted_columns_from_account("email")
-print(b)
+print('setting info')
+print(get_account_avator("assdfd"))
+print(get_account_setting("assdfd"))
+print(get_user_name('assdfd'))

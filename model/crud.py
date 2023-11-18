@@ -9,10 +9,13 @@ def read_default(COLUMNS: str, TABLES: str, CONDITION: str):
             # print(config)
             with mysql.connector.connect(**config) as cnx:
                 cursor = cnx.cursor()
+                # cursor.execute(f"SHOW COLUMNS FROM {TABLES}")
+
                 sql = f"SELECT {COLUMNS} FROM {TABLES}"
                 if CONDITION:
+                    print(CONDITION)
                     sql += f" WHERE {CONDITION}"
-
+                print(sql)
                 cursor.execute(sql)
                 result = cursor.fetchall()
                 return result
