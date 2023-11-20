@@ -1,24 +1,23 @@
 import mysql.connector
 import json
 
+def get_db_connection():
+    with open('../core/dbInfo.json') as json_file:
+        config = json.load(json_file)
+        return mysql.connector.connect(**config)
+
 def read_default(COLUMNS: str, TABLES: str, CONDITION: str):
     try:
-        with open('../core/dbInfo.json') as json_file:
-            config = json.load(json_file)
-            # config['raise_on_warnings'] = bool(config['raise_on_warnings'])
-            # print(config)
-            with mysql.connector.connect(**config) as cnx:
-                cursor = cnx.cursor()
-                # cursor.execute(f"SHOW COLUMNS FROM {TABLES}")
+        with get_db_connection() as cnx:
+            cursor = cnx.cursor()
 
-                sql = f"SELECT {COLUMNS} FROM {TABLES}"
-                if CONDITION:
-                    print(CONDITION)
-                    sql += f" WHERE {CONDITION}"
-                print(sql)
-                cursor.execute(sql)
-                result = cursor.fetchall()
-                return result
+            sql = f"SELECT {COLUMNS} FROM {TABLES}"
+            if CONDITION:
+                sql += f" WHERE {CONDITION}"
+
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            return result
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -33,4 +32,4 @@ def read_default(COLUMNS: str, TABLES: str, CONDITION: str):
 # result = read_default(columns, tables, condition)
 # print(result)
 # for row in result:
-#     print (row)
+#     print(row)
