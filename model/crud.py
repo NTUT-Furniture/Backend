@@ -1,34 +1,35 @@
 import mysql.connector
+from mysql.connector import pooling
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def get_db_connection():
-    db_host = os.getenv("DB_HOST")
-    db_user = os.getenv("DB_USER")
-    db_password = os.getenv("DB_PASSWORD")
-    db_database = os.getenv("DB_DATABASE")
+pool_config = {
+    "pool_name": "pool",
+    "pool_size": 5,
+    "host": os.getenv("DB_HOST"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "database": os.getenv("DB_DATABASE")
+}
 
-    return mysql.connector.connect(
-        host=db_host,
-        user=db_user,
-        password=db_password,
-        database=db_database
-    )
+cnx_pool = pooling.MySQLConnectionPool(**pool_config)
 
 def read_default(COLUMNS: str, TABLES: str, CONDITION: str):
     try:
-        with get_db_connection() as cnx:
-            cursor = cnx.cursor()
+        connection = cnx_pool.get_connection()
+        cursor = connection.cursor()
 
-            sql = f"SELECT {COLUMNS} FROM {TABLES}"
-            if CONDITION:
-                sql += f" WHERE {CONDITION}"
+        sql = f"SELECT {COLUMNS} FROM {TABLES}"
+        if CONDITION:
+            sql += f" WHERE {CONDITION}"
+        cursor.execute(sql)
+        result = cursor.fetchall()
 
-            cursor.execute(sql)
-            result = cursor.fetchall()
-            return result
+        cursor.close()
+        connection.close()
+        return result
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
