@@ -1,10 +1,21 @@
 import mysql.connector
-import json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_db_connection():
-    with open('../core/dbInfo.json') as json_file:
-        config = json.load(json_file)
-        return mysql.connector.connect(**config)
+    db_host = os.getenv("DB_HOST")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
+    db_database = os.getenv("DB_DATABASE")
+
+    return mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        password=db_password,
+        database=db_database
+    )
 
 def read_default(COLUMNS: str, TABLES: str, CONDITION: str):
     try:

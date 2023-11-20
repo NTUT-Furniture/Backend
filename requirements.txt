@@ -3,3 +3,4 @@ fastapi-csrf-protect
 pydantic
 uvicorn
 mysql-connector-python
+python-dotenv
