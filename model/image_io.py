@@ -4,7 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 class ImgSourceEnum(str, Enum):
     avatar = "avatar"
@@ -24,6 +26,10 @@ def get_filename(file: UploadFile) -> str:
     return f"{new_filename}.{filetype}"
 
 async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) -> bool:
+    if file.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(status_code=400, detail="File must be jpeg or png format!")
+    if file.size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File size must be less than 10MB!")
     try:
         directory_path = get_directory_path(whom, id)
         if not os.path.exists(directory_path):
