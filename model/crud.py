@@ -34,7 +34,7 @@ def read_default(COLUMNS: str, TABLES: str, CONDITION: str = None):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
 
-def update_default(TABLES: str, SET_VALUES: str, CONDITION: str = None):
+def update_default(TABLES: str, SET_VALUES: dict, CONDITION: str = None):
     try:
         connection = cnx_pool.get_connection()
         cursor = connection.cursor()
@@ -53,15 +53,3 @@ def update_default(TABLES: str, SET_VALUES: str, CONDITION: str = None):
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-
-# Example usage:
-# columns = "*"
-# tables = "Account"
-# condition = ""
-# result = read_default("email, credit_card", "Account", "")
-# for row in result:
-#     print(row)
-# result = read_default(columns, tables, condition)
-# print(result)
-# for row in result:
-#     print(row)
