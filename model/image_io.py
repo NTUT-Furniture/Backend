@@ -27,9 +27,11 @@ def get_filename(file: UploadFile) -> str:
 
 async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) -> bool:
     if file.content_type not in ["image/jpeg", "image/png"]:
-        raise HTTPException(status_code=400, detail="File must be jpeg or png format!")
+        raise HTTPException(status_code=400,
+                            detail=f"File must be jpeg or png format! Get {file.content_type} instead!")
     if file.size > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File size must be less than 10MB!")
+        raise HTTPException(status_code=400,
+                            detail=f"File size must be less than 10MB! Get {file.size} instead!")
     try:
         directory_path = get_directory_path(whom, id)
         if not os.path.exists(directory_path):
