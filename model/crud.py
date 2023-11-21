@@ -16,7 +16,7 @@ pool_config = {
 
 cnx_pool = pooling.MySQLConnectionPool(**pool_config)
 
-def read_default(COLUMNS: str, TABLES: str, CONDITION: str = None):
+def read_default(COLUMNS: str, TABLES: str, CONDITION: str = ""):
     try:
         connection = cnx_pool.get_connection()
         cursor = connection.cursor()
@@ -34,7 +34,7 @@ def read_default(COLUMNS: str, TABLES: str, CONDITION: str = None):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
 
-def update_default(TABLES: str, SET_VALUES: dict, CONDITION: str = None):
+def update_default(TABLES: str, SET_VALUES: dict, CONDITION: str = ""):
     try:
         connection = cnx_pool.get_connection()
         cursor = connection.cursor()
