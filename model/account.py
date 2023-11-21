@@ -9,4 +9,4 @@ class modelExample(BaseModel):
 
 class responseSuccessModel(BaseModel):
     status: str
-    message: Optional[str] = None 
+    message: Optional[str] = None
