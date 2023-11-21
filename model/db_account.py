@@ -3,11 +3,15 @@ import datetime
 
 def get_all_column_from_account():
     result = crud.read_default("*", "`Account`", "")
-    return result
+    all_columns = ['account_uuid', 'name', 'pwd', 'image_url', 'email', 'phone', 'credit_card', 'birthday', 
+                   'city', 'district', 'street', 'alley', 'floor', 'is_active', 'update_time']
+    result_dict = dict(zip(all_columns, result[0]))
+    return result_dict
 
 def get_excepted_columns_from_account(COLUMNS: str, CONDITIONS: str):
     result = crud.read_default(COLUMNS, "`Account`", CONDITIONS)
-    return result
+    result_dict = dict(zip(COLUMNS.split(", "), result[0]))
+    return result_dict
 
 def update_excepted_value_from_account(SET_VALUES: dict, CONDITIONS: str):
     crud.update_default("`Account`", SET_VALUES, CONDITIONS)
