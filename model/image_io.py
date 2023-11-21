@@ -14,8 +14,8 @@ def list_files(dir_path: str) -> list:
     files_list = [os.path.join(root, file) for root, _, files in os.walk(dir_path) for file in files]
     return files_list
 
-def get_directory_path(whom: ImgSourceEnum) -> str:
-    path = f"../upload_images/{whom.value}"
+def get_directory_path(whom: ImgSourceEnum, id: str) -> str:
+    path = f"../upload_images/{whom.value}/{id}"
     return path
 
 def get_filename(file: UploadFile) -> str:
@@ -23,15 +23,15 @@ def get_filename(file: UploadFile) -> str:
     new_filename = f"{filename}_{datetime.now().timestamp()}"
     return f"{new_filename}.{filetype}"
 
-def save_file(file: Optional[UploadFile], whom: ImgSourceEnum) -> bool:
+async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) -> bool:
     try:
-        directory_path = get_directory_path(whom)
+        directory_path = get_directory_path(whom, id)
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
         filename = get_filename(file)
-
         with open(os.path.join(directory_path, filename), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+
     except (OSError, shutil.Error) as e:
         # LOG_ERROR(f"Error copying file: {e}")  TODO: the logger system
         return False

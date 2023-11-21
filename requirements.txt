@@ -2,3 +2,4 @@ fastapi
 fastapi-csrf-protect
 pydantic
 uvicorn
+python-multipart
