@@ -1,13 +1,14 @@
-import mysql.connector
-from mysql.connector import pooling
 import os
-from dotenv import load_dotenv
-from typing import Union, Tuple, Dict, List
 from typing import Final
-import datetime
+from typing import Union, Tuple, Dict, Optional
+
+import mysql.connector
+from dotenv import load_dotenv
+from mysql.connector import pooling
+
 load_dotenv()
 
-pool_config = {
+pool_config: Final = {
     "pool_name": "pool",
     "pool_size": 5,
     "host": os.getenv("DB_HOST"),
@@ -15,70 +16,58 @@ pool_config = {
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_DATABASE"),
 }
-pool_config: Final
-
 
 cnx_pool = pooling.MySQLConnectionPool(**pool_config)
 
-
-def get_all_result(sql, param: Union[Tuple, None] = None) -> Dict:
+def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Union[Dict, bool]:
+    connection = None
+    cursor = None
     try:
         connection = cnx_pool.get_connection()
         cursor = connection.cursor()
 
-        if param is None:
-            cursor.execute(sql)
+        count = cursor.execute(sql, param or ())
+        if fetch:
+            result = cursor.fetchall()
+            column_names = [desc[0] for desc in cursor.description]
+            result = [dict(zip(column_names, row)) for row in result]
         else:
-            cursor.execute(sql, param)
-        result = cursor.fetchall()
-        
-        cursor.close()
-        connection.close()
-        column_names = [desc[0] for desc in cursor.description]
-        result = [dict(zip(column_names, row)) for row in result]
-        return result
+            result = count != 0
 
-    except mysql.connector.Error as e:
-        print(e)
-        cursor.close()
-        connection.close()
-        return False
-
-def execute_query(sql, param: Union[Tuple, None] = None) -> bool:
-    try:
-        connection = cnx_pool.get_connection()
-        cursor = connection.cursor()
-
-        if param is None:
-            count = cursor.execute(sql)
-        else:
-            count = cursor.execute(sql, param)
-        if count == 0:
-            cursor.close()
-            connection.close()
-            return False
         connection.commit()
-        cursor.close()
-        connection.close()
-        return True
 
     except mysql.connector.Error as e:
         print(e)
-        cursor.close()
-        connection.rollback()
-        connection.close()
-        return False
-    
-def dict_to_sqltext(_dict: Dict, exclude_col: List[str] = []) -> Tuple[str, tuple]:
-    sqltext = []
+        if not fetch:
+            if connection is not None:
+                connection.rollback()
+        result = None
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None:
+            connection.close()
+
+    return result
+
+def get_all_result(sql, param: Optional[Tuple] = None) -> Union[Dict, bool]:
+    return execute_sql(sql, param, fetch=True)
+
+def execute_query(sql, param: Optional[Tuple] = None) -> bool:
+    return execute_sql(sql, param)
+
+def dict_to_sql_command(_dict: Dict, exclude_col=None) -> Tuple[str, tuple]:
+    if exclude_col is None:
+        exclude_col = []
+    sql_command = []
     values = tuple()
     for key, value in list(_dict.items()):
         if key not in exclude_col:
-            sqltext.append(f'{key}=%s')
+            sql_command.append(f'{key}=%s')
             values += (value,)
 
-    return ",".join(sqltext), values
-
+    return ",".join(sql_command), values
 
 def dict_delete_none(_dict: Dict) -> Dict:
     for key, value in list(_dict.items()):
