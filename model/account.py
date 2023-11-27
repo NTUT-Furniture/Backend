@@ -16,3 +16,14 @@ class UpdateAccountForm(BaseModel):
     birthday: Optional[str]
     address: Optional[str]
     is_active: Optional[bool]
+
+@as_form
+class CreateAccount(BaseModel):
+    name: str
+    pwd: str
+    image_url: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    credit_card: Optional[str] = None
+    birthday: Optional[str] = None
+    address: Optional[str] = None
