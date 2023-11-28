@@ -1,8 +1,20 @@
-from typing import Optional
-
+from typing import Optional, List
 from pydantic import BaseModel
-
 from utils.as_form import as_form
+from model.general import SuccessModel
+class Account(BaseModel):
+    account_uuid: str
+    name: str
+    image_url: str
+    email: str
+    phone: str
+    birthday: str
+    address: str
+    is_active: int
+    update_time: str
+
+class GetAccount(SuccessModel):
+    data: List[Account]
 
 @as_form
 class UpdateAccountForm(BaseModel):
