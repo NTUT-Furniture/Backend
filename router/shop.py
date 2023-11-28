@@ -5,7 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from model.shop import ReturnShopModel, CreateShopForm, UpdateShopForm
-from model.general import SuccessModel
+from model.general import SuccessModel, ErrorModel
 from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter()
@@ -14,6 +14,9 @@ router = APIRouter()
     status.HTTP_200_OK: {
         "model": ReturnShopModel
     },
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorModel
+    }
 })
 async def get_shop(
     shop_uuid: str = None,
@@ -53,6 +56,9 @@ async def get_shop(
     status.HTTP_200_OK: {
         "model": SuccessModel
     },
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorModel
+    }
 })
 async def create_shop(
     shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
@@ -76,10 +82,14 @@ async def create_shop(
             "msg": "Fail"
         })
     )
+
 @router.put("/shop", tags=["shop"], responses={
     status.HTTP_200_OK: {
         "model": SuccessModel
     },
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorModel
+    }
 })
 async def update_shop(
     shop_form: UpdateShopForm = Depends(UpdateShopForm.as_form)

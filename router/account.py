@@ -64,6 +64,7 @@ async def get_account(
             "msg": "fail",
         })
     )
+
 @router.post("/account", tags=["account"], responses={
     status.HTTP_200_OK: {
         "model": SuccessModel
@@ -97,6 +98,7 @@ async def create_account(
                 "msg": "fail"
             })
         )
+
 @router.put("/account", tags=["account"], responses={
     status.HTTP_200_OK: {
         "model": SuccessModel
@@ -110,7 +112,6 @@ async def update_account(
 ):
     account_form = account_form.model_dump()
     account_form = dict_delete_none(account_form)
-
     sql_set_text, sql_set_values = dict_to_sql_command(account_form)
     sql = f"""
         UPDATE `Account` SET {sql_set_text} WHERE account_uuid = %s;
