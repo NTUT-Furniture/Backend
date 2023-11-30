@@ -40,10 +40,10 @@ async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) ->
         with open(os.path.join(directory_path, filename), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-    except (OSError, shutil.Error) as e:
+    except (OSError, shutil.Error):
         # LOG_ERROR(f"Error copying file: {e}")  TODO: the logger system
         return False
-    except (FileNotFoundError, PermissionError) as e:
+    except (FileNotFoundError, PermissionError):
         # LOG_ERROR(f"Error copying file: {e}")
         return False
     return True

@@ -101,7 +101,7 @@ async def get_account(
              status_code=201,
              tags=["account", "img_upload"]
              )
-async def upload_image(id, file: UploadFile):
+async def upload_image(id: str, file: UploadFile):
     flag = await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
     return {"filename": file.filename, "content_type": file.content_type, "size": file.size, "success": flag}
 
@@ -110,5 +110,5 @@ async def upload_image(id, file: UploadFile):
             status_code=200,
             tags=["account", "img_get"]
             )
-async def get_image(id):
+async def get_image(id: str):
     pass

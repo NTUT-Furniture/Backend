@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from core.settings import Settings
-from router.entries import register_router
+from router import register_router
 
 app = FastAPI(
     title="NFT API",
