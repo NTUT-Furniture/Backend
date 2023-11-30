@@ -11,6 +11,13 @@ app = FastAPI(
     openapi_url=Settings["api_prefix"],
 )
 
-app.add_middleware(CORSMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(account.router, prefix=Settings["api_prefix"])
 app.include_router(shop.router, prefix=Settings["api_prefix"])
