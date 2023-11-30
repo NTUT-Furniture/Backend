@@ -4,15 +4,16 @@ from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.account import GetAccount, CreateAccount, UpdateAccountForm
+from model.account import ReturnAccount, CreateAccountForm, UpdateAccountForm
 from model.general import SuccessModel, ErrorModel
+
 from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter()
 
 @router.get("/account", tags=["account"], responses={
     status.HTTP_200_OK: {
-        "model": GetAccount
+        "model": ReturnAccount
     },
     status.HTTP_404_NOT_FOUND: {
         "model": ErrorModel
@@ -21,35 +22,25 @@ router = APIRouter()
 async def get_account(
     account_uuid: str = None
 ):
-    if account_uuid is None:
-        sql = """
-            SELECT
-                account_uuid,
-                name,
-                image_url,
-                email,
-                phone,
-                birthday,
-                address,
-                is_active,
-                update_time FROM `Account`;
-        """
-        result = get_all_result(sql)
-    else:
-        sql = """
-            SELECT
-                account_uuid,
-                name,
-                image_url,
-                email,
-                phone,
-                birthday,
-                address,
-                is_active,
-                update_time FROM `Account`
-                where account_uuid = %s;
-        """
+    sql = """
+        SELECT
+            account_uuid,
+            name,
+            image_url,
+            email,
+            phone,
+            birthday,
+            address,
+            is_active,
+            update_time
+        FROM `Account`
+    """
+    if account_uuid is not None:
+        sql += " WHERE account_uuid = %s;"
         result = get_all_result(sql, (account_uuid,))
+    else:
+        sql += ";"
+        result = get_all_result(sql)
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -74,7 +65,7 @@ async def get_account(
     }
 })
 async def create_account(
-    account_form: CreateAccount = Depends(CreateAccount.as_form)
+    account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
 ):
     account_form = account_form.model_dump()
     sql = """
@@ -91,13 +82,12 @@ async def create_account(
                 "msg": "success"
             })
         )
-    else:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=jsonable_encoder({
-                "msg": "fail"
-            })
-        )
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content=jsonable_encoder({
+            "msg": "fail"
+        })
+    )
 
 @router.put("/account", tags=["account"], responses={
     status.HTTP_200_OK: {

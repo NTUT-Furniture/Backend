@@ -1,17 +1,21 @@
 from pydantic import BaseModel
+
 from typing import Optional, List
+
 from model.general import SuccessModel
+
 from utils.as_form import as_form
 
-class GetShopModel(BaseModel):
+class Shop(BaseModel):
     shop_uuid: str
     account_uuid: str
     name: str
     description: str
     image_url: str
     update_time: str
-class ReturnShopModel(SuccessModel):
-    data: List[GetShopModel]
+
+class ReturnShop(SuccessModel):
+    data: List[Shop]
 
 @as_form
 class CreateShopForm(BaseModel):

@@ -4,39 +4,28 @@ from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.shop import ReturnShopModel, CreateShopForm, UpdateShopForm
+from model.shop import ReturnShop, CreateShopForm, UpdateShopForm
 from model.general import SuccessModel, ErrorModel
+
 from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter()
 
 @router.get("/shop", tags=["shop"], responses={
     status.HTTP_200_OK: {
-        "model": ReturnShopModel
+        "model": ReturnShop
     },
     status.HTTP_404_NOT_FOUND: {
         "model": ErrorModel
     }
 })
 async def get_shop(
-    shop_uuid: str = None,
-    account_uuid: str = None
+    account_uuid: str
 ):
-    if shop_uuid:
-        sql = """
-            SELECT * FROM `Shop` WHERE shop_uuid = %s;
-        """
-        result = get_all_result(sql, (shop_uuid,))
-    elif account_uuid:
-        sql = """
-            SELECT * FROM `Shop` WHERE account_uuid = %s;
-        """
-        result = get_all_result(sql, (account_uuid,))
-    else:
-        sql = """
-            SELECT * FROM `Shop`;
-        """
-        result = get_all_result(sql)
+    sql = """
+        SELECT * FROM `Shop` WHERE account_uuid = %s;
+    """
+    result = get_all_result(sql, (account_uuid,))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
