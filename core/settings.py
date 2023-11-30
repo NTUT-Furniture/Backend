@@ -1,10 +1,11 @@
 import configparser
 import os
+from typing import Final
 
 config = configparser.ConfigParser()
 config.read(os.path.join(os.path.dirname(__file__), 'env.ini'))
 
-Settings = {
+Settings: Final = {
     "host": str(config["SERVER"]["host"]),
     "port": int(config["SERVER"]["port"]),
     "workers": int(config["SERVER"]["workers"]),
