@@ -97,7 +97,7 @@ async def get_account(
         content=jsonable_encoder({"msg": "fail"})
     )
 
-@router.post("/{id}/upload_image",
+@router.post("/upload_image/{id}",
              description="Upload image(jpeg/png) for product, max_size = 10MB",
              responses={
                  status.HTTP_200_OK: {"model": ImageIOSuccessModel},
@@ -117,7 +117,7 @@ async def upload_image(id: str, file: UploadFile):
         content=jsonable_encoder({"msg": "No such account" + id})
     )
 
-@router.get("/{id}/get_image/{file_name}",
+@router.get("/get_image/{id}/{file_name}",
             description="Get image(jpeg/png) for product",
             responses={
                 status.HTTP_200_OK: {"model": ImageIOSuccessModel},

@@ -12,7 +12,7 @@ router = APIRouter(
     tags=["product"],
 )
 
-@router.post("/{id}/upload_image",
+@router.post("/upload_image/{id}",
              description="Upload image(jpeg/png) for product, max_size = 10MB",
              responses={
                  status.HTTP_200_OK: {
