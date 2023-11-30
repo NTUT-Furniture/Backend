@@ -27,7 +27,7 @@ class CreateProductForm(BaseModel):
     stock: int
     image_url: str
     price: int
-    tags: str
+    tags: Optional[str] = None
     description: Optional[str] = None
 
 class ReturnCreateProduct(SuccessModel):

@@ -11,9 +11,11 @@ from utils.db_process import get_all_result, execute_query, dict_to_sql_command,
 
 import uuid
 
-router = APIRouter()
+router = APIRouter(
+    tags=["product"]
+)
 
-@router.get("/product", tags=["product"], responses={
+@router.get("/product", responses={
     status.HTTP_200_OK: {
         "model": ReturnProduct
     },
@@ -43,7 +45,7 @@ async def get_product(
         })
     )
 
-@router.post("/product", tags=["product"], responses={
+@router.post("/product", responses={
     status.HTTP_200_OK: {
         "model": ReturnCreateProduct
     },
@@ -76,7 +78,7 @@ async def create_product(
         })
     )
 
-@router.put("/product", tags=["product"], responses={
+@router.put("/product", responses={
     status.HTTP_200_OK: {
         "model": SuccessModel
     },
