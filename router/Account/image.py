@@ -1,7 +1,12 @@
-from fastapi import UploadFile
+from fastapi import UploadFile, APIRouter
 
-from router.Account.account import router
 from utils import image_io
+
+prefix = "/account"
+router = APIRouter(
+    prefix=prefix,
+    tags=["account", "get"],
+)
 
 @router.post("/{id}/upload_image",
              description="Upload image(jpeg/png) for product, max_size = 10MB",

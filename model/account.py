@@ -1,17 +1,15 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
+
+from pydantic import BaseModel
+
+from model.general import SuccessModel
+from utils.as_form import as_form
 
 class modelExample(BaseModel):
     id: int
     name: str
     email: str
-    password: strfrom typing import Optional, List
-
-from pydantic import BaseModel
-
-from utils.as_form import as_form
-
-from model.general import SuccessModel
+    password: str
 
 class Account(BaseModel):
     account_uuid: str

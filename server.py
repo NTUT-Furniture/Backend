@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.settings import Settings
-from router import account, shop
 from router.entries import register_router
 
 app = FastAPI(
