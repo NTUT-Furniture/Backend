@@ -4,7 +4,7 @@ from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
 
-from model.image_io import ImageIOSuccessModel, ImageIOFailModel
+from model.image import ImageUploadSuccessModel, ImageIOFailModel
 from utils import image_io
 from utils.db_process import get_all_results
 
@@ -16,7 +16,7 @@ router = APIRouter(
              description="Upload image(jpeg/png) for product, max_size = 10MB",
              responses={
                  status.HTTP_200_OK: {
-                     "model": ImageIOSuccessModel
+                     "model": ImageUploadSuccessModel
                  },
                  status.HTTP_400_BAD_REQUEST: {
                      "model": ImageIOFailModel

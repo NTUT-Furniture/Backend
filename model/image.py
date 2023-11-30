@@ -1,5 +1,3 @@
-from typing import Optional
-
 from fastapi import UploadFile
 from pydantic import BaseModel
 
@@ -7,11 +5,19 @@ from model.general import SuccessModel
 from utils.as_form import as_form
 
 @as_form
-class ImageIOSuccessModel(SuccessModel):
-    file_name: str
+class ImageUploadForm(BaseModel):
+    owner_uuid: str
+    file: UploadFile
+
+class ImageUploadSuccessModel(SuccessModel):
+    image_uuid: str
     content_type: str
     size: int
-    file: Optional[UploadFile] = None
+
+@as_form
+class ImageGetForm(BaseModel):
+    owner_uuid: str
+    file_uuid: str
 
 class ImageIOFailModel(BaseModel):
     msg: str = ""

@@ -1,20 +1,18 @@
 import uuid
 
-from fastapi import APIRouter, Depends, status, UploadFile
+from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from model.account import CreateAccountForm, ReturnCreateAccount, UpdateAccountForm, ReturnAccount
 from model.general import ErrorModel, SuccessModel
-from model.image_io import ImageIOSuccessModel, ImageIOFailModel
-from utils import image_io
 from utils.db_process import get_all_results, execute_query, dict_delete_none, dict_to_sql_command
 
 router = APIRouter(
     tags=["account"],
 )
 
-@router.post("/create", tags=["account"], responses={
+@router.post("/create", tags=["create"], responses={
     status.HTTP_200_OK: {"model": ReturnCreateAccount},
     status.HTTP_404_NOT_FOUND: {"model": ErrorModel}
 })
@@ -39,7 +37,7 @@ async def create_account(
         content=jsonable_encoder({"msg": "fail"})
     )
 
-@router.put("/update", tags=["account"], responses={
+@router.put("/update", tags=["update"], responses={
     status.HTTP_200_OK: {"model": SuccessModel},
     status.HTTP_404_NOT_FOUND: {"model": ErrorModel}
 })
@@ -61,7 +59,7 @@ async def update_account(
         content=jsonable_encoder({"msg": "fail"})
     )
 
-@router.get("/get", tags=["account"], responses={
+@router.get("/get", tags=["get"], responses={
     status.HTTP_200_OK: {"model": ReturnAccount},
     status.HTTP_404_NOT_FOUND: {"model": ErrorModel}
 })
@@ -94,45 +92,5 @@ async def get_account(
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({"msg": "fail"})
-    )
-
-@router.post("/upload_image/{id}",
-             description="Upload image(jpeg/png) for product, max_size = 10MB",
-             responses={
-                 status.HTTP_200_OK: {"model": ImageIOSuccessModel},
-                 status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
-             },
-             tags=["account", "img_upload"]
-             )
-async def upload_image(id: str, file: UploadFile):
-    script = """
-    SELECT EXISTS(SELECT 1 FROM Account WHERE account_uuid = %s) AS UUID_Exists;
-    """
-    result = get_all_results(script, (id,))
-    if result:
-        return await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content=jsonable_encoder({"msg": "No such account:" + id + script})
-    )
-
-@router.get("/get_image/{id}/{file_name}",
-            description="Get image(jpeg/png) for product",
-            responses={
-                status.HTTP_200_OK: {"model": ImageIOSuccessModel},
-                status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
-            },
-            tags=["account", "img_get"]
-            )
-async def get_image(id: str, file_name: str):
-    result = await image_io.get_file(image_io.ImgSourceEnum.avatar, id, file_name)
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({"msg": "success", "data": result})
-        )
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder({"msg": "fail"})
     )

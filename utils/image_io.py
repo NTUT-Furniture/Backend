@@ -1,8 +1,8 @@
 import os
 import shutil
-from datetime import datetime
 from enum import Enum
 from typing import Optional, Union
+from uuid import uuid4
 
 from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
@@ -14,20 +14,20 @@ class ImgSourceEnum(str, Enum):
     avatar = "avatar"
     product = "product"
 
-def list_files(dir_path: str) -> list:
+def list_files(dir_path: str) -> list[str]:
     files_list = [os.path.join(root, file) for root, _, files in os.walk(dir_path) for file in files]
     return files_list
 
-def get_directory_path(whom: ImgSourceEnum, id: str) -> str:
-    path = f"../upload_images/{whom.value}/{id}"
+def get_directory_path(owner_id: str) -> str:
+    path = f"../upload_images/{owner_id}"
     return path
 
 def get_filename(file: UploadFile) -> str:
-    filename, filetype = file.filename.split(".")
-    new_filename = f"{filename}_{datetime.now().timestamp()}"
+    _, filetype = file.filename.split(".")
+    new_filename = str(uuid4())
     return f"{new_filename}.{filetype}"
 
-async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) -> JSONResponse:
+async def save_file(file: Optional[UploadFile], owner_id: str) -> JSONResponse:
     if file.content_type not in ["image/jpeg", "image/png"]:
         return JSONResponse(
             status_code=400,
@@ -35,9 +35,9 @@ async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) ->
     if file.size > MAX_FILE_SIZE:
         return JSONResponse(
             status_code=400,
-            content=f"File size must be less than 10MB! The file uploaded is  {file.size} B!")
+            content=f"File size must be less than 10MB! The file uploaded is  {file.size} Bytes!")
     try:
-        directory_path = get_directory_path(whom, id)
+        directory_path = get_directory_path(owner_id)
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
         filename = get_filename(file)
@@ -52,22 +52,22 @@ async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) ->
         status_code=status.HTTP_200_OK,
         content=jsonable_encoder({
             "msg": "success",
-            "file_name": filename,
+            "image_uuid": filename.split(".")[0],
             "size": file.size
         })
     )
 
-async def get_file(source: ImgSourceEnum, id: str, filename: str) -> Union[FileResponse, JSONResponse]:
-    directory_path = get_directory_path(source, id)
+async def get_file(owner_uuid: str, file_uuid: str) -> Union[FileResponse, JSONResponse]:
+    directory_path = get_directory_path(owner_uuid)
     if not os.path.exists(directory_path):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=jsonable_encoder({"msg": "They haven't upload any image yet"})
+            content=jsonable_encoder({"msg": f"uuid {owner_uuid} haven't upload any image yet"})
         )
 
     files_list = list_files(directory_path)
     for file in files_list:
-        if filename in file:
+        if file_uuid in file:
             return FileResponse(file)
 
     return JSONResponse(
