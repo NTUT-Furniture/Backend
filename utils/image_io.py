@@ -4,7 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from fastapi import UploadFile, HTTPException
+from fastapi import UploadFile, status
+from fastapi.encoders import jsonable_encoder
+from starlette.responses import JSONResponse
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -27,11 +29,13 @@ def get_filename(file: UploadFile) -> str:
 
 async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str):
     if file.content_type not in ["image/jpeg", "image/png"]:
-        raise HTTPException(status_code=400,
-                            detail=f"File must be jpeg or png format! Get {file.content_type} instead!")
+        return JSONResponse(
+            status_code=400,
+            content=f"File must be jpeg or png format! Get {file.content_type} instead!")
     if file.size > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400,
-                            detail=f"File size must be less than 10MB! Get {file.size} instead!")
+        return JSONResponse(
+            status_code=400,
+            content=f"File size must be less than 10MB! The file uploaded is  {file.size} B!")
     try:
         directory_path = get_directory_path(whom, id)
         if not os.path.exists(directory_path):
@@ -39,9 +43,16 @@ async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str):
         filename = get_filename(file)
         with open(os.path.join(directory_path, filename), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-
-    except (OSError, shutil.Error) as e:
-        raise HTTPException(status_code=400, detail=e)
-    except (FileNotFoundError, PermissionError) as e:
-        raise HTTPException(status_code=400, detail=e)
-    return filename
+    except Exception as e:
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=f"Error when saving file: {e}"
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder({
+            "msg": "success",
+            "file_name": filename,
+            "size": file.size
+        })
+    )
