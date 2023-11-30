@@ -10,10 +10,10 @@ from model.general import SuccessModel, ErrorModel
 from model.shop import ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm
 from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
-router = APIRouter()
+router = APIRouter(tags=["shop"])
 
 @router.get(
-    "/shop", tags=["shop"], responses={
+    "/", tags=["get", "HTTP_GET"], responses={
         status.HTTP_200_OK: {
             "model": ReturnShop
         },
@@ -21,7 +21,7 @@ router = APIRouter()
             "model": ErrorModel
         }
     }
-    )
+)
 async def get_shop(
         account_uuid: str
 ):
@@ -49,7 +49,7 @@ async def get_shop(
     )
 
 @router.post(
-    "/shop", tags=["shop"], responses={
+    "/", tags=["create", "HTTP_POST"], responses={
         status.HTTP_200_OK: {
             "model": ReturnCreateShop
         },
@@ -57,7 +57,7 @@ async def get_shop(
             "model": ErrorModel
         }
     }
-    )
+)
 async def create_shop(
         shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
 ):
@@ -88,7 +88,7 @@ async def create_shop(
     )
 
 @router.put(
-    "/shop", tags=["shop"], responses={
+    "/", tags=["update", "HTTP_PUT"], responses={
         status.HTTP_200_OK: {
             "model": SuccessModel
         },
@@ -96,7 +96,7 @@ async def create_shop(
             "model": ErrorModel
         }
     }
-    )
+)
 async def update_shop(
         shop_form: UpdateShopForm = Depends(UpdateShopForm.as_form)
 ):

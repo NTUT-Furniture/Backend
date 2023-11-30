@@ -7,7 +7,7 @@ from utils import image_io
 from utils.db_process import if_exists_in_db
 
 router = APIRouter(
-    tags=["image"],
+    tags=["image", "product", "account"],
 )
 
 @router.post(
@@ -17,8 +17,8 @@ router = APIRouter(
         status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
         status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
     },
-    tags=["img_upload"]
-    )
+    tags=["upload", "HTTP_POST"]
+)
 async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
     if if_exists_in_db("Account", "account_uuid", owner_uuid) or \
             if_exists_in_db("Product", "product_uuid", owner_uuid):
@@ -39,8 +39,8 @@ async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
             "model": ImageIOFailModel
         },
     },
-    tags=["img_get"]
-    )
+    tags=["get", "get_all", "HTTP_GET"]
+)
 async def get_all_images(owner_uuid: str):
     return await image_io.get_all_files(owner_uuid)
 
@@ -55,7 +55,7 @@ async def get_all_images(owner_uuid: str):
             "model": ImageIOFailModel
         },
     },
-    tags=["img_get"]
-    )
+    tags=["get", "product", "account", "HTTP_GET"]
+)
 async def get_image(image_form: ImageGetForm = Depends(ImageGetForm.as_form)):
     return await image_io.get_file(image_form.owner_uuid, image_form.file_uuid)

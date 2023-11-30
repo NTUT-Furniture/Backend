@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 @router.post(
-    "/create", tags=["create"], responses={
+    "/", tags=["create", "HTTP_POST"], responses={
         status.HTTP_200_OK: {
             "model": ReturnCreateAccount
         },
@@ -53,7 +53,7 @@ async def create_account(
     )
 
 @router.put(
-    "/update", tags=["update"], responses={
+    "/", tags=["update", "HTTP_PUT"], responses={
         status.HTTP_200_OK: {
             "model": SuccessModel
         },
@@ -89,7 +89,7 @@ async def update_account(
     )
 
 @router.get(
-    "/get", tags=["get"], responses={
+    "/", tags=["get", "HTTP_GET"], responses={
         status.HTTP_200_OK: {
             "model": ReturnAccount
         },
