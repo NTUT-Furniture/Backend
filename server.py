@@ -4,8 +4,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.settings import Settings
-from router import product as product_router
-from router import account as account_router
+from router.entries import register_router
 
 app = FastAPI(
     title="FastAPI Demo",
@@ -16,5 +15,4 @@ app = FastAPI(
 )
 
 app.add_middleware(CORSMiddleware)
-app.include_router(product_router.router)
-app.include_router(account_router.router)
+register_router(app)
