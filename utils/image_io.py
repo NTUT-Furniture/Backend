@@ -25,7 +25,7 @@ def get_filename(file: UploadFile) -> str:
     new_filename = f"{filename}_{datetime.now().timestamp()}"
     return f"{new_filename}.{filetype}"
 
-async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) -> bool:
+async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str):
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400,
                             detail=f"File must be jpeg or png format! Get {file.content_type} instead!")
@@ -40,10 +40,8 @@ async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) ->
         with open(os.path.join(directory_path, filename), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-    except (OSError, shutil.Error):
-        # LOG_ERROR(f"Error copying file: {e}")  TODO: the logger system
-        return False
-    except (FileNotFoundError, PermissionError):
-        # LOG_ERROR(f"Error copying file: {e}")
-        return False
-    return True
+    except (OSError, shutil.Error) as e:
+        raise HTTPException(status_code=400, detail=e)
+    except (FileNotFoundError, PermissionError) as e:
+        raise HTTPException(status_code=400, detail=e)
+    return filename

@@ -1,13 +1,13 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
-class ImageIOSuccessModel(BaseModel):
-    filename: str
+from model.general import SuccessModel
+from utils.as_form import as_form
+
+@as_form
+class ImageIOSuccessModel(SuccessModel):
+    file_name: str
     content_type: str
     size: int
-    success: bool
 
 class ImageIOFailModel(BaseModel):
-    status: str
-    message: Optional[str] = None
+    msg: str = ""

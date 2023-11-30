@@ -1,11 +1,12 @@
 import uuid
 
-from fastapi import APIRouter, Depends, status, UploadFile
+from fastapi import APIRouter, Depends, status, UploadFile, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from model.account import CreateAccountForm, ReturnCreateAccount, UpdateAccountForm, ReturnAccount
 from model.general import ErrorModel, SuccessModel
+from model.image_io import ImageIOSuccessModel, ImageIOFailModel
 from utils import image_io
 from utils.db_process import get_all_result, execute_query, dict_delete_none, dict_to_sql_command
 
@@ -98,17 +99,45 @@ async def get_account(
 
 @router.post("/{id}/upload_image",
              description="Upload image(jpeg/png) for product, max_size = 10MB",
-             status_code=201,
+             responses={
+                 status.HTTP_200_OK: {"model": ImageIOSuccessModel},
+                 status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
+             },
              tags=["account", "img_upload"]
              )
 async def upload_image(id: str, file: UploadFile):
-    flag = await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
-    return {"filename": file.filename, "content_type": file.content_type, "size": file.size, "success": flag}
+    try:
+        new_file_name = await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
+    except HTTPException as e:
+        return JSONResponse(
+            status_code=e.status_code,
+            content=e.detail
+        )
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder({
+            "msg": "success",
+            "file_name": new_file_name,
+            "size": file.size
+        })
+    )
 
-@router.get("/{id}/get_image",
+@router.get("/{id}/get_image/{file_name}",
             description="Get image(jpeg/png) for product",
-            status_code=200,
+            responses={
+                status.HTTP_200_OK: {"model": ImageIOSuccessModel},
+                status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
+            },
             tags=["account", "img_get"]
             )
-async def get_image(id: str):
-    pass
+async def get_image(id: str, file_name: str):
+    result = await image_io.get_file(image_io.ImgSourceEnum.avatar, id, file_name)
+    if result:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder({"msg": "success", "data": result})
+        )
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=jsonable_encoder({"msg": "fail"})
+    )
