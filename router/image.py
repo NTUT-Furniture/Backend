@@ -27,13 +27,32 @@ async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
         content=jsonable_encoder({"msg": f"No such owner: {owner_uuid}"})
     )
 
-@router.get("/get_image/{file_name}",
+@router.get("/get_all_images/{owner_id}/all",
+            description="Get all images(jpeg/png) for account or product",
+            responses={
+                status.HTTP_200_OK: {
+                    "model": ImageUploadSuccessModel
+                },
+                status.HTTP_400_BAD_REQUEST: {
+                    "model": ImageIOFailModel
+                },
+            },
+            tags=["img_get"]
+            )
+async def get_all_images(owner_uuid: str):
+    return await image_io.get_all_files(owner_uuid)
+
+@router.get("/get_image/",
             description="Get image(jpeg/png) for account or product",
             responses={
-                status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
-                status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
+                status.HTTP_200_OK: {
+                    "model": ImageUploadSuccessModel
+                },
+                status.HTTP_400_BAD_REQUEST: {
+                    "model": ImageIOFailModel
+                },
             },
             tags=["img_get"]
             )
 async def get_image(image_form: ImageGetForm = Depends(ImageGetForm.as_form)):
-    return await image_io.get_file(image_form.owner_uuid, image_form.file_uuid)
+    return await image_io.get_all_files(image_form.owner_uuid, image_form.file_uuid)

@@ -1,11 +1,13 @@
+import io
 import os
 import shutil
+import zipfile
 from typing import Optional, Union
 from uuid import uuid4
 
 from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
-from starlette.responses import JSONResponse, FileResponse
+from starlette.responses import JSONResponse, FileResponse, StreamingResponse
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -53,6 +55,29 @@ async def save_file(file: Optional[UploadFile], owner_id: str) -> JSONResponse:
             "size": file.size
         })
     )
+
+async def get_all_files(owner_uuid: str) -> Union[StreamingResponse, JSONResponse]:
+    directory_path = get_directory_path(owner_uuid)
+    if not os.path.exists(directory_path):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=jsonable_encoder({
+                "msg": f"uuid {owner_uuid} haven't upload any image yet"
+            })
+        )
+    files_list = list_files(directory_path)
+    print(files_list)
+    data = io.BytesIO()
+    with zipfile.ZipFile(data, mode='w') as z:
+        for file_name in files_list:
+            z.write(file_name, arcname=os.path.relpath(file_name, start=directory_path))
+
+    data.seek(0)
+    return StreamingResponse(
+        data, media_type='application/zip',
+        headers={
+            "Content-Disposition": f"attachment; filename={owner_uuid}.zip"
+        })
 
 async def get_file(owner_uuid: str, file_uuid: str) -> Union[FileResponse, JSONResponse]:
     directory_path = get_directory_path(owner_uuid)
