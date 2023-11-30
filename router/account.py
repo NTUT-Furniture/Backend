@@ -106,7 +106,16 @@ async def get_account(
              tags=["account", "img_upload"]
              )
 async def upload_image(id: str, file: UploadFile):
-    return await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
+    script = """
+    SELECT EXISTS(SELECT 1 FROM Account WHERE account_uuid = '%d') AS UUID_Exists;
+    """
+    result = execute_query(script, (id,))
+    if result:
+        return await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=jsonable_encoder({"msg": "No such account" + id})
+    )
 
 @router.get("/{id}/get_image/{file_name}",
             description="Get image(jpeg/png) for product",
