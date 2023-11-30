@@ -1,11 +1,7 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 class SuccessModel(BaseModel):
-    status: str
-    msg: Optional[str] = None
+    msg: str = "Success"
 
 class ErrorModel(BaseModel):
-    status: str
-    msg: Optional[str] = None
+    msg: str = "Fail"
