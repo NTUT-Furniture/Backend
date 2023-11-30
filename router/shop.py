@@ -55,7 +55,7 @@ async def create_shop(
     shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
 ):
     shop_form = shop_form.model_dump()
-    id = uuid.uuid4()
+    id = str(uuid.uuid4())
     sql = """
         INSERT INTO `Shop`
         VALUES (%s, %s, %s, %s, %s, DEFAULT);
