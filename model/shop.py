@@ -24,6 +24,9 @@ class CreateShopForm(BaseModel):
     image_url: str
     description: Optional[str]
 
+class ReturnCreateShop(SuccessModel):
+    data: str
+
 @as_form
 class UpdateShopForm(BaseModel):
     shop_uuid: str

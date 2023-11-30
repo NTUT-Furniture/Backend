@@ -31,6 +31,9 @@ class CreateAccountForm(BaseModel):
     birthday: Optional[str] = None
     address: Optional[str] = None
 
+class ReturnCreateAccount(SuccessModel):
+    data: str
+
 @as_form
 class UpdateAccountForm(BaseModel):
     account_uuid: str

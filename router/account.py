@@ -4,10 +4,12 @@ from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.account import ReturnAccount, CreateAccountForm, UpdateAccountForm
+from model.account import ReturnAccount, CreateAccountForm, ReturnCreateAccount, UpdateAccountForm
 from model.general import SuccessModel, ErrorModel
 
 from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
+
+import uuid
 
 router = APIRouter()
 
@@ -58,7 +60,7 @@ async def get_account(
 
 @router.post("/account", tags=["account"], responses={
     status.HTTP_200_OK: {
-        "model": SuccessModel
+        "model": ReturnCreateAccount
     },
     status.HTTP_404_NOT_FOUND: {
         "model": ErrorModel
@@ -68,18 +70,19 @@ async def create_account(
     account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
 ):
     account_form = account_form.model_dump()
+    id = uuid.uuid4()
     sql = """
         INSERT INTO `Account`
-        VALUES(
-            UUID(), %s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
         );
     """
-    result = execute_query(sql, tuple(account_form.values()))
+    result = execute_query(sql, (str(id),) + tuple(account_form.values()))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=jsonable_encoder({
-                "msg": "success"
+                "msg": "success",
+                "data": id
             })
         )
     return JSONResponse(
