@@ -55,12 +55,12 @@ async def create_shop(
     shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
 ):
     shop_form = shop_form.model_dump()
-    id = str(uuid.uuid4())
+    id = uuid.uuid4()
     sql = """
         INSERT INTO `Shop`
         VALUES (%s, %s, %s, %s, %s, DEFAULT);
     """
-    result = execute_query(sql, (id,) + tuple(shop_form.values()))
+    result = execute_query(sql, (str(id),) + tuple(shop_form.values()))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,

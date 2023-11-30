@@ -55,12 +55,12 @@ async def create_product(
     product_form: CreateProductForm = Depends(CreateProductForm.as_form)
 ):
     product_form = product_form.model_dump()
-    id = str(uuid.uuid4())
+    id = uuid.uuid4()
     sql = """
         INSERT INTO `Product`
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT);
     """
-    result = execute_query(sql, (id,) + tuple(product_form.values()))
+    result = execute_query(sql, (str(id),) + tuple(product_form.values()))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
