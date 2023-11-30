@@ -1,9 +1,13 @@
+from fastapi import APIRouter
 from fastapi import UploadFile
 from fastapi import status
 
 from model.image_io import ImageIOSuccessModel, ImageIOFailModel
-from router.Product.product import router
 from utils import image_io
+
+router = APIRouter(
+    tags=["product"],
+)
 
 @router.post("/{id}/upload_image",
              description="Upload image(jpeg/png) for product, max_size = 10MB",

@@ -1,8 +1,13 @@
-from router.Product.image import router as product_image_router
+from fastapi import APIRouter
 
-from router.Account.account import gather_all_routers as gather_all_account_routers
+from .account import router as account_router
+from .product import router as product_router
+from .shop import router as shop_router
 
 def register_router(app):
-    for router in gather_all_account_routers():
-        app.include_router(router)
-    app.include_router(product_image_router)
+    router = APIRouter()
+    router.include_router(account_router, prefix="/account")
+    router.include_router(product_router, prefix="/product")
+    router.include_router(shop_router, prefix="/shop")
+
+    app.include_router(router, prefix="/api")
