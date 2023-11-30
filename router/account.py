@@ -13,8 +13,12 @@ router = APIRouter(
 )
 
 @router.post("/create", tags=["create"], responses={
-    status.HTTP_200_OK: {"model": ReturnCreateAccount},
-    status.HTTP_404_NOT_FOUND: {"model": ErrorModel}
+    status.HTTP_200_OK: {
+        "model": ReturnCreateAccount
+    },
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorModel
+    }
 })
 async def create_account(
         account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
@@ -30,16 +34,25 @@ async def create_account(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({"msg": "success", "data": id})
+            content=jsonable_encoder({
+                "msg": "success",
+                "data": id
+            })
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({"msg": "fail"})
+        content=jsonable_encoder({
+            "msg": "fail"
+        })
     )
 
 @router.put("/update", tags=["update"], responses={
-    status.HTTP_200_OK: {"model": SuccessModel},
-    status.HTTP_404_NOT_FOUND: {"model": ErrorModel}
+    status.HTTP_200_OK: {
+        "model": SuccessModel
+    },
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorModel
+    }
 })
 async def update_account(
         account_form: UpdateAccountForm = Depends(UpdateAccountForm.as_form)
@@ -52,16 +65,24 @@ async def update_account(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({"msg": "success"})
+            content=jsonable_encoder({
+                "msg": "success"
+            })
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({"msg": "fail"})
+        content=jsonable_encoder({
+            "msg": "fail"
+        })
     )
 
 @router.get("/get", tags=["get"], responses={
-    status.HTTP_200_OK: {"model": ReturnAccount},
-    status.HTTP_404_NOT_FOUND: {"model": ErrorModel}
+    status.HTTP_200_OK: {
+        "model": ReturnAccount
+    },
+    status.HTTP_404_NOT_FOUND: {
+        "model": ErrorModel
+    }
 })
 async def get_account(
         account_uuid: str = None
@@ -88,9 +109,14 @@ async def get_account(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({"msg": "success", "data": result})
+            content=jsonable_encoder({
+                "msg": "success",
+                "data": result
+            })
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({"msg": "fail"})
+        content=jsonable_encoder({
+            "msg": "fail"
+        })
     )
