@@ -12,5 +12,12 @@ app = FastAPI(
     openapi_url=Settings["api_prefix"],
 )
 
-app.add_middleware(CORSMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 register_router(app)
