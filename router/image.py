@@ -10,14 +10,15 @@ router = APIRouter(
     tags=["image"],
 )
 
-@router.post("/upload/{owner_id}",
-             description="Upload image(jpeg/png) for product, max_size = 10MB",
-             responses={
-                 status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
-                 status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
-             },
-             tags=["img_upload"]
-             )
+@router.post(
+    "/upload/{owner_id}",
+    description="Upload image(jpeg/png) for product, max_size = 10MB",
+    responses={
+        status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
+        status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
+    },
+    tags=["img_upload"]
+    )
 async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
     if if_exists_in_db("Account", "account_uuid", owner_uuid) or \
             if_exists_in_db("Product", "product_uuid", owner_uuid):
@@ -27,32 +28,34 @@ async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
         content=jsonable_encoder({"msg": f"No such owner: {owner_uuid}"})
     )
 
-@router.get("/get_all_images/{owner_id}/all",
-            description="Get all images(jpeg/png) for account or product",
-            responses={
-                status.HTTP_200_OK: {
-                    "model": ImageUploadSuccessModel
-                },
-                status.HTTP_400_BAD_REQUEST: {
-                    "model": ImageIOFailModel
-                },
-            },
-            tags=["img_get"]
-            )
+@router.get(
+    "/get_all_images/{owner_id}/all",
+    description="Get all images(jpeg/png) for account or product",
+    responses={
+        status.HTTP_200_OK: {
+            "model": ImageUploadSuccessModel
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ImageIOFailModel
+        },
+    },
+    tags=["img_get"]
+    )
 async def get_all_images(owner_uuid: str):
     return await image_io.get_all_files(owner_uuid)
 
-@router.get("/get_image/",
-            description="Get image(jpeg/png) for account or product",
-            responses={
-                status.HTTP_200_OK: {
-                    "model": ImageUploadSuccessModel
-                },
-                status.HTTP_400_BAD_REQUEST: {
-                    "model": ImageIOFailModel
-                },
-            },
-            tags=["img_get"]
-            )
+@router.get(
+    "/get_image/",
+    description="Get image(jpeg/png) for account or product",
+    responses={
+        status.HTTP_200_OK: {
+            "model": ImageUploadSuccessModel
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ImageIOFailModel
+        },
+    },
+    tags=["img_get"]
+    )
 async def get_image(image_form: ImageGetForm = Depends(ImageGetForm.as_form)):
-    return await image_io.get_all_files(image_form.owner_uuid, image_form.file_uuid)
+    return await image_io.get_file(image_form.owner_uuid, image_form.file_uuid)

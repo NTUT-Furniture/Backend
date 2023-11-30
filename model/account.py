@@ -5,12 +5,6 @@ from pydantic import BaseModel
 from model.general import SuccessModel
 from utils.as_form import as_form
 
-class modelExample(BaseModel):
-    id: int
-    name: str
-    email: str
-    password: str
-
 class Account(BaseModel):
     account_uuid: str
     name: str
