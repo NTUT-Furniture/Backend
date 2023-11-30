@@ -8,7 +8,7 @@ from model.account import CreateAccountForm, ReturnCreateAccount, UpdateAccountF
 from model.general import ErrorModel, SuccessModel
 from model.image_io import ImageIOSuccessModel, ImageIOFailModel
 from utils import image_io
-from utils.db_process import get_all_result, execute_query, dict_delete_none, dict_to_sql_command
+from utils.db_process import get_all_results, execute_query, dict_delete_none, dict_to_sql_command
 
 router = APIRouter(
     tags=["account"],
@@ -83,10 +83,10 @@ async def get_account(
     """
     if account_uuid is not None:
         sql += " WHERE account_uuid = %s;"
-        result = get_all_result(sql, (account_uuid,))
+        result = get_all_results(sql, (account_uuid,))
     else:
         sql += ";"
-        result = get_all_result(sql)
+        result = get_all_results(sql)
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -107,14 +107,14 @@ async def get_account(
              )
 async def upload_image(id: str, file: UploadFile):
     script = """
-    SELECT EXISTS(SELECT 1 FROM Account WHERE account_uuid = '%d') AS UUID_Exists;
+    SELECT EXISTS(SELECT 1 FROM Account WHERE account_uuid = %s) AS UUID_Exists;
     """
-    result = execute_query(script, (id,))
+    result = get_all_results(script, (id,))
     if result:
         return await image_io.save_file(file, image_io.ImgSourceEnum.avatar, id)
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content=jsonable_encoder({"msg": "No such account" + id})
+        content=jsonable_encoder({"msg": "No such account:" + id + script})
     )
 
 @router.get("/get_image/{id}/{file_name}",

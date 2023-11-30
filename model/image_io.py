@@ -1,3 +1,6 @@
+from typing import Optional
+
+from fastapi import UploadFile
 from pydantic import BaseModel
 
 from model.general import SuccessModel
@@ -8,6 +11,7 @@ class ImageIOSuccessModel(SuccessModel):
     file_name: str
     content_type: str
     size: int
+    file: Optional[UploadFile] = None
 
 class ImageIOFailModel(BaseModel):
     msg: str = ""

@@ -2,11 +2,11 @@ import os
 import shutil
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, FileResponse
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -27,7 +27,7 @@ def get_filename(file: UploadFile) -> str:
     new_filename = f"{filename}_{datetime.now().timestamp()}"
     return f"{new_filename}.{filetype}"
 
-async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str):
+async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str) -> JSONResponse:
     if file.content_type not in ["image/jpeg", "image/png"]:
         return JSONResponse(
             status_code=400,
@@ -55,4 +55,22 @@ async def save_file(file: Optional[UploadFile], whom: ImgSourceEnum, id: str):
             "file_name": filename,
             "size": file.size
         })
+    )
+
+async def get_file(source: ImgSourceEnum, id: str, filename: str) -> Union[FileResponse, JSONResponse]:
+    directory_path = get_directory_path(source, id)
+    if not os.path.exists(directory_path):
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=jsonable_encoder({"msg": "They haven't upload any image yet"})
+        )
+
+    files_list = list_files(directory_path)
+    for file in files_list:
+        if filename in file:
+            return FileResponse(file)
+
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content=jsonable_encoder({"msg": "No such file"})
     )

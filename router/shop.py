@@ -1,15 +1,14 @@
+import uuid
+
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.shop import ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm
 from model.general import SuccessModel, ErrorModel
-
-from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
-
-import uuid
+from model.shop import ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm
+from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter()
 
@@ -22,12 +21,12 @@ router = APIRouter()
     }
 })
 async def get_shop(
-    account_uuid: str
+        account_uuid: str
 ):
     sql = """
         SELECT * FROM `Shop` WHERE account_uuid = %s;
     """
-    result = get_all_result(sql, (account_uuid,))
+    result = get_all_results(sql, (account_uuid,))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -52,7 +51,7 @@ async def get_shop(
     }
 })
 async def create_shop(
-    shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
+        shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
 ):
     shop_form = shop_form.model_dump()
     id = uuid.uuid4()
@@ -85,7 +84,7 @@ async def create_shop(
     }
 })
 async def update_shop(
-    shop_form: UpdateShopForm = Depends(UpdateShopForm.as_form)
+        shop_form: UpdateShopForm = Depends(UpdateShopForm.as_form)
 ):
     shop_form = shop_form.model_dump()
     shop_form = dict_delete_none(shop_form)

@@ -51,7 +51,7 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
 
     return result
 
-def get_all_result(sql, param: Optional[Tuple] = None) -> Union[Dict, bool]:
+def get_all_results(sql, param: Optional[Tuple] = None) -> Union[Dict, bool]:
     return execute_sql(sql, param, fetch=True)
 
 def execute_query(sql, param: Optional[Tuple] = None) -> bool:
