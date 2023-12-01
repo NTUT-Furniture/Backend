@@ -14,4 +14,4 @@ class ImageUploadSuccessModel(SuccessModel):
     size: int
 
 class ImageIOFailModel(BaseModel):
-    msg: str = "Failed to upload image!"
+    msg: str = "Failed"
