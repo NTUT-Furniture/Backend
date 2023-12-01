@@ -1,6 +1,6 @@
-from fastapi import APIRouter
-from fastapi import Depends
-from fastapi import status
+import uuid
+
+from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -9,22 +9,98 @@ from model.general import SuccessModel, ErrorModel
 
 from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
 
-import uuid
-
 router = APIRouter(
-    tags=["account"]
+    tags=["account"],
 )
 
-@router.get("/account", responses={
-    status.HTTP_200_OK: {
-        "model": ReturnAccount
-    },
-    status.HTTP_404_NOT_FOUND: {
-        "model": ErrorModel
+@router.post(
+    "/", tags=["create"], responses={
+        status.HTTP_200_OK: {
+            "model": ReturnCreateAccount
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
     }
-})
+)
+async def create_account(
+    account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
+):
+    account_form = account_form.model_dump()
+    account_id = uuid.uuid4()
+    sql = """
+        INSERT INTO `Account`
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
+        );
+    """
+    result = execute_query(sql, (str(account_id),) + tuple(account_form.values()))
+    if result:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder(
+                {
+                    "msg": "success",
+                    "data": account_id
+                }
+            )
+        )
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content=jsonable_encoder(
+            {
+                "msg": "fail"
+            }
+        )
+    )
+
+@router.put(
+    "/", tags=["update"], responses={
+        status.HTTP_200_OK: {
+            "model": SuccessModel
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def update_account(
+    account_form: UpdateAccountForm = Depends(UpdateAccountForm.as_form)
+):
+    account_form = account_form.model_dump()
+    account_form = dict_delete_none(account_form)
+    sql_set_text, sql_set_values = dict_to_sql_command(account_form)
+    sql = f"""UPDATE `Account` SET {sql_set_text} WHERE account_uuid = %s;"""
+    result = execute_query(sql, (sql_set_values + (account_form["account_uuid"],)))
+    if result:
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder(
+                {
+                    "msg": "success"
+                }
+            )
+        )
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content=jsonable_encoder(
+            {
+                "msg": "fail"
+            }
+        )
+    )
+
+@router.get(
+    "/", tags=["get"], responses={
+        status.HTTP_200_OK: {
+            "model": ReturnAccount
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
 async def get_account(
-    account_uuid: str = None
+        account_uuid: str = None
 ):
     sql = """
         SELECT
@@ -41,87 +117,25 @@ async def get_account(
     """
     if account_uuid is not None:
         sql += " WHERE account_uuid = %s;"
-        result = get_all_result(sql, (account_uuid,))
+        result = get_all_results(sql, (account_uuid,))
     else:
         sql += ";"
-        result = get_all_result(sql)
+        result = get_all_results(sql)
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({
-                "msg": "success",
-                "data": result
-            })
+            content=jsonable_encoder(
+                {
+                    "msg": "success",
+                    "data": result
+                }
+            )
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "fail",
-        })
-    )
-
-@router.post("/account", responses={
-    status.HTTP_200_OK: {
-        "model": ReturnCreateAccount
-    },
-    status.HTTP_404_NOT_FOUND: {
-        "model": ErrorModel
-    }
-})
-async def create_account(
-    account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
-):
-    account_form = account_form.model_dump()
-    id = uuid.uuid4()
-    sql = """
-        INSERT INTO `Account`
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
-        );
-    """
-    result = execute_query(sql, (str(id),) + tuple(account_form.values()))
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({
-                "msg": "success",
-                "data": id
-            })
+        content=jsonable_encoder(
+            {
+                "msg": "fail"
+            }
         )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "fail"
-        })
-    )
-
-@router.put("/account", responses={
-    status.HTTP_200_OK: {
-        "model": SuccessModel
-    },
-    status.HTTP_404_NOT_FOUND: {
-        "model": ErrorModel
-    }
-})
-async def update_account(
-    account_form: UpdateAccountForm = Depends(UpdateAccountForm.as_form)
-):
-    account_form = account_form.model_dump()
-    account_form = dict_delete_none(account_form)
-    sql_set_text, sql_set_values = dict_to_sql_command(account_form)
-    sql = f"""
-        UPDATE `Account` SET {sql_set_text} WHERE account_uuid = %s;
-    """
-    result = execute_query(sql, (sql_set_values + (account_form["account_uuid"],)))
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({
-                "msg": "success"
-            })
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "fail"
-        })
     )

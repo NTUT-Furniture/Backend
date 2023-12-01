@@ -1,6 +1,8 @@
-fastapi
+fastapi~=0.104.1
 fastapi-csrf-protect
-pydantic
-uvicorn
-mysql-connector-python
-python-dotenv
+pydantic~=2.4.2
+uvicorn~=0.23.2
+mysql-connector-python~=8.2.0
+python-dotenv~=1.0.0
+python-multipart
+starlette~=0.27.0

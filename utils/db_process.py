@@ -51,7 +51,7 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
 
     return result
 
-def get_all_result(sql, param: Optional[Tuple] = None) -> Union[Dict, bool]:
+def get_all_results(sql, param: Optional[Tuple] = None) -> Union[Dict, bool]:
     return execute_sql(sql, param, fetch=True)
 
 def execute_query(sql, param: Optional[Tuple] = None) -> bool:
@@ -80,3 +80,9 @@ def dict_delete_none(_dict: Dict) -> Dict:
                 dict_delete_none(v_i)
 
     return _dict
+
+async def if_exists_in_db(table_name, column_name, value) -> bool:
+    sql = f"SELECT EXISTS(SELECT 1 FROM {table_name} WHERE {column_name} = %s) AS UUID_Exists;"
+    result = get_all_results(sql, (value,))
+    assert result[0]["UUID_Exists"] in [0, 1]
+    return result[0]["UUID_Exists"] == 1

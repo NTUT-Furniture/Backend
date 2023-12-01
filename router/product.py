@@ -1,6 +1,6 @@
-from fastapi import APIRouter
-from fastapi import Depends
-from fastapi import status
+import uuid
+
+from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -8,8 +8,6 @@ from model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct,
 from model.general import SuccessModel, ErrorModel
 
 from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
-
-import uuid
 
 router = APIRouter(
     tags=["product"]

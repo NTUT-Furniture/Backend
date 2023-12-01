@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from core.settings import Settings
-from router import account, shop, product
+from router import register_router
 
 app = FastAPI(
     title="NFT API",
@@ -19,6 +20,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(account.router, prefix=Settings["api_prefix"])
-app.include_router(shop.router, prefix=Settings["api_prefix"])
-app.include_router(product.router, prefix=Settings["api_prefix"])
+register_router(app)
