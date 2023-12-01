@@ -8,5 +8,4 @@ if __name__ == "__main__":
         port=Settings["port"],
         reload=True,
         workers=Settings["workers"],
-	root_path=Settings["root_path"]
     )
