@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from model.shop import ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm
 from model.general import SuccessModel, ErrorModel
 
-from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
+from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter(
     tags=["shop"]
@@ -31,7 +31,7 @@ async def get_shop(
     sql = """
         SELECT * FROM `Shop` WHERE account_uuid = %s;
     """
-    result = get_all_result(sql, (account_uuid,))
+    result = get_all_results(sql, (account_uuid,))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,

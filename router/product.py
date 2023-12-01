@@ -7,27 +7,29 @@ from fastapi.responses import JSONResponse
 from model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm
 from model.general import SuccessModel, ErrorModel
 
-from utils.db_process import get_all_result, execute_query, dict_to_sql_command, dict_delete_none
+from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter(
     tags=["product"]
 )
 
-@router.get("/product", responses={
-    status.HTTP_200_OK: {
-        "model": ReturnProduct
-    },
-    status.HTTP_404_NOT_FOUND: {
-        "model": ErrorModel
+@router.get(
+    "/", tags=["get"], responses={
+        status.HTTP_200_OK: {
+            "model": ReturnProduct
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
     }
-})
+)
 async def get_product(
 	shop_uuid: str
 ):
     sql = """
         SELECT * FROM `Product` WHERE shop_uuid = %s;
     """
-    result = get_all_result(sql, (shop_uuid,))
+    result = get_all_results(sql, (shop_uuid,))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -43,14 +45,16 @@ async def get_product(
         })
     )
 
-@router.post("/product", responses={
-    status.HTTP_200_OK: {
-        "model": ReturnCreateProduct
-    },
-    status.HTTP_404_NOT_FOUND: {
-        "model": ErrorModel
+@router.post(
+    "/", tags=["create"], responses={
+        status.HTTP_200_OK: {
+            "model": ReturnCreateProduct
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
     }
-})
+)
 async def create_product(
     product_form: CreateProductForm = Depends(CreateProductForm.as_form)
 ):
@@ -76,14 +80,16 @@ async def create_product(
         })
     )
 
-@router.put("/product", responses={
-    status.HTTP_200_OK: {
-        "model": SuccessModel
-    },
-    status.HTTP_404_NOT_FOUND: {
-        "model": ErrorModel
+@router.put(
+    "/", tags=["update"], responses={
+        status.HTTP_200_OK: {
+            "model": SuccessModel
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
     }
-})
+)
 async def update_product(
     product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
 ):
