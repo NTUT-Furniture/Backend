@@ -1,8 +1,6 @@
 import uuid
 
-from fastapi import APIRouter
-from fastapi import Depends
-from fastapi import status
+from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
