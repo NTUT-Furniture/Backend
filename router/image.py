@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 @router.post(
-    "/upload/{owner_id}/{typimg_typee}",
+    "/upload",
     description="Upload image(jpeg/png) for product, max_size = 10MB",
     responses={
         status.HTTP_200_OK: {
