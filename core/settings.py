@@ -11,5 +11,5 @@ Settings: Final = {
     "workers": int(config["SERVER"]["workers"]),
     "api_prefix": str(config["SERVER"]["api_prefix"]),
     "api_docs": str(config["SERVER"]["api_docs"]),
-    "root_path": str(config["SERVER"]["root_path"]),
+    "api_redoc": str(config["SERVER"]["api_redoc"]),
 }

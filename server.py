@@ -8,6 +8,7 @@ app = FastAPI(
     title="NFT API",
     description="NTUT furniture trading API",
     version="0.0.1",
+    redoc_url=Settings["api_redoc"],
     docs_url=Settings["api_docs"],
     openapi_url=Settings["api_prefix"],
 )
