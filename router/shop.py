@@ -13,7 +13,7 @@ from utils.db_process import get_all_results, execute_query, dict_to_sql_command
 router = APIRouter(tags=["shop"])
 
 @router.get(
-    "/", tags=["get", "HTTP_GET"], responses={
+    "/", tags=["get"], responses={
         status.HTTP_200_OK: {
             "model": ReturnShop
         },
@@ -49,7 +49,7 @@ async def get_shop(
     )
 
 @router.post(
-    "/", tags=["create", "HTTP_POST"], responses={
+    "/", tags=["create"], responses={
         status.HTTP_200_OK: {
             "model": ReturnCreateShop
         },
@@ -88,7 +88,7 @@ async def create_shop(
     )
 
 @router.put(
-    "/", tags=["update", "HTTP_PUT"], responses={
+    "/", tags=["update"], responses={
         status.HTTP_200_OK: {
             "model": SuccessModel
         },

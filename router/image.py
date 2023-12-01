@@ -17,7 +17,7 @@ router = APIRouter(
         status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
         status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel},
     },
-    tags=["upload", "HTTP_POST"]
+    tags=["upload"]
 )
 async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
     if if_exists_in_db("Account", "account_uuid", owner_uuid) or \
@@ -39,7 +39,7 @@ async def upload_image(owner_uuid: str, file: UploadFile = File(...)):
             "model": ImageIOFailModel
         },
     },
-    tags=["get", "get_all", "HTTP_GET"]
+    tags=["get", "get_all"]
 )
 async def get_all_images(owner_uuid: str):
     return await image_io.get_all_files(owner_uuid)
@@ -55,7 +55,7 @@ async def get_all_images(owner_uuid: str):
             "model": ImageIOFailModel
         },
     },
-    tags=["get", "product", "account", "HTTP_GET"]
+    tags=["get", "product", "account"]
 )
 async def get_image(image_form: ImageGetForm = Depends(ImageGetForm.as_form)):
     return await image_io.get_file(image_form.owner_uuid, image_form.file_uuid)
