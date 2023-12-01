@@ -81,7 +81,7 @@ def dict_delete_none(_dict: Dict) -> Dict:
 
     return _dict
 
-def if_exists_in_db(table_name, column_name, value) -> bool:
+async def if_exists_in_db(table_name, column_name, value) -> bool:
     sql = f"SELECT EXISTS(SELECT 1 FROM {table_name} WHERE {column_name} = %s) AS UUID_Exists;"
     result = get_all_results(sql, (value,))
     assert result[0]["UUID_Exists"] in [0, 1]

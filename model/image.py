@@ -1,3 +1,5 @@
+from enum import Enum
+
 from fastapi import UploadFile
 from pydantic import BaseModel
 
@@ -14,10 +16,14 @@ class ImageUploadSuccessModel(SuccessModel):
     content_type: str
     size: int
 
+class ImageTypeModel(str, Enum):
+    avatar = "avatar"
+    banner = "banner"
+
 @as_form
 class ImageGetForm(BaseModel):
     owner_uuid: str
-    file_uuid: str
+    img_type: ImageTypeModel = ImageTypeModel.avatar
 
 class ImageIOFailModel(BaseModel):
     msg: str = ""

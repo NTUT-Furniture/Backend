@@ -1,30 +1,30 @@
-import io
 import os
 import shutil
-import zipfile
 from typing import Optional, Union
-from uuid import uuid4
 
 from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
-from starlette.responses import JSONResponse, FileResponse, StreamingResponse
+from starlette.responses import JSONResponse, FileResponse
+
+from model.image import ImageTypeModel
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
-def list_files(dir_path: str) -> list[str]:
-    files_list = [os.path.join(root, file) for root, _, files in os.walk(dir_path) for file in files]
-    return files_list
+def if_exists(file_path: str, target_filename: str) -> Union[None, str]:
+    for filename in os.listdir(file_path):
+        if os.path.splitext(filename)[0] == target_filename:
+            return os.path.splitext(filename)[1]
+    return None
 
 def get_directory_path(owner_id: str) -> str:
     path = f"../upload_images/{owner_id}"
     return path
 
-def get_filename(file: UploadFile) -> str:
+def get_filename(file: UploadFile, image_type: ImageTypeModel) -> str:
     _, filetype = file.filename.split(".")
-    new_filename = str(uuid4())
-    return f"{new_filename}.{filetype}"
+    return f"{image_type.value}.{filetype}"
 
-async def save_file(file: Optional[UploadFile], owner_id: str) -> JSONResponse:
+async def save_file(file: Optional[UploadFile], owner_id: str, image_type: ImageTypeModel) -> JSONResponse:
     if file.content_type not in ["image/jpeg", "image/png"]:
         return JSONResponse(
             status_code=400,
@@ -39,7 +39,7 @@ async def save_file(file: Optional[UploadFile], owner_id: str) -> JSONResponse:
         directory_path = get_directory_path(owner_id)
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
-        filename = get_filename(file)
+        filename = get_filename(file, image_type)
         with open(os.path.join(directory_path, filename), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
@@ -49,54 +49,35 @@ async def save_file(file: Optional[UploadFile], owner_id: str) -> JSONResponse:
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content=jsonable_encoder({
-            "msg": "success",
-            "image_uuid": filename.split(".")[0],
-            "size": file.size
-        })
+        content=jsonable_encoder(
+            {
+                "msg": "success",
+                "owner_uuid": f"{owner_id}",
+                "image_type": f"{image_type.value}",
+                "size": f"{file.size}Bytes",
+            }
+        )
     )
 
-async def get_all_files(owner_uuid: str) -> Union[StreamingResponse, JSONResponse]:
+async def get_file(owner_uuid: str, image_type: ImageTypeModel) -> Union[FileResponse, JSONResponse]:
     directory_path = get_directory_path(owner_uuid)
     if not os.path.exists(directory_path):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=jsonable_encoder({
-                "msg": f"uuid {owner_uuid} haven't upload any image yet"
-            })
+            content=jsonable_encoder(
+                {
+                    "msg": f"uuid {owner_uuid} haven't upload any image yet"
+                }
+            )
         )
-    files_list = list_files(directory_path)
-    print(files_list)
-    data = io.BytesIO()
-    with zipfile.ZipFile(data, mode='w') as z:
-        for file_name in files_list:
-            z.write(file_name, arcname=os.path.relpath(file_name, start=directory_path))
-
-    data.seek(0)
-    return StreamingResponse(
-        data, media_type='application/zip',
-        headers={
-            "Content-Disposition": f"attachment; filename={owner_uuid}.zip"
-        })
-
-async def get_file(owner_uuid: str, file_uuid: str) -> Union[FileResponse, JSONResponse]:
-    directory_path = get_directory_path(owner_uuid)
-    if not os.path.exists(directory_path):
+    ext = if_exists(directory_path, image_type)
+    if ext is None:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content=jsonable_encoder({
-                "msg": f"uuid {owner_uuid} haven't upload any image yet"
-            })
+            content=jsonable_encoder(
+                {
+                    "msg": f"uuid {owner_uuid} haven't upload {image_type.value} yet"
+                }
+            )
         )
-
-    files_list = list_files(directory_path)
-    for file in files_list:
-        if file_uuid in file:
-            return FileResponse(file)
-
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "No such file"
-        })
-    )
+    return FileResponse(f"{directory_path}/{image_type.value}{ext}")
