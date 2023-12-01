@@ -19,6 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.include_router(account.router, prefix=Settings["api_prefix"])
+app.include_router(account.router, prefix=Settings["api_prefix"])
 app.include_router(shop.router, prefix=Settings["api_prefix"])
 app.include_router(product.router, prefix=Settings["api_prefix"])
