@@ -105,3 +105,28 @@ async def get_current_active_user(
     #         detail="Inactive user"
     #     )
     return current_user
+
+async def if_account_owns_shop(
+        account_uuid: str,
+        shop_uuid: str
+) -> bool:
+    return await db_process.if_one_owns_the_other(
+        "Shop", "account_uuid", account_uuid
+        , "shop_uuid", shop_uuid
+    )
+
+async def if_shop_owns_product(
+        shop_uuid: str,
+        product_uuid: str
+) -> bool:
+    return await db_process.if_one_owns_the_other(
+        "Product", "shop_uuid",
+        shop_uuid, "product_uuid", product_uuid
+    )
+
+async def if_account_owns_product(
+        account_uuid: str,
+        product_uuid: str
+) -> bool:
+    return await if_account_owns_shop(account_uuid, product_uuid) and \
+        await if_shop_owns_product(account_uuid, product_uuid)
