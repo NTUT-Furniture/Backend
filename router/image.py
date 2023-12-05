@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, status, UploadFile, File, Depends
+from fastapi import APIRouter, status, UploadFile, File, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from model.account import Account
@@ -26,8 +26,10 @@ async def is_image_available(account_uuid):
         await if_exists_in_db("Shop", "shop_uuid", account_uuid)
 
 @router.post(
-    "/upload", responses={
+    "/upload",
+    responses={
         status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
+        status.HTTP_404_NOT_FOUND: {"model": ImageIOFailModel},
         status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel}
     }
 )
@@ -38,15 +40,20 @@ async def upload_image(
     owner_uuid = account.account_uuid
     if img_type == ImageTypeModel.banner:
         if not await if_exists_in_db("Shop", "account_uuid", owner_uuid):
-            return {"msg": f"No such shop: {owner_uuid}"}
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Account {owner_uuid} has no shop!"
+            )
         return await image_io.save_file(file, owner_uuid, img_type)
     elif img_type == ImageTypeModel.avatar and await is_image_available(owner_uuid):
         return await image_io.save_file(file, owner_uuid, img_type)
     return handle_image_not_found(img_type, owner_uuid)
 
 @router.get(
-    "/get_image/", responses={
+    "/get_image/",
+    responses={
         status.HTTP_200_OK: {"model": ImageUploadSuccessModel},
+        status.HTTP_404_NOT_FOUND: {"model": ImageIOFailModel},
         status.HTTP_400_BAD_REQUEST: {"model": ImageIOFailModel}
     }
 )
@@ -57,8 +64,11 @@ async def get_image(
 ):
     owner_uuid = account.account_uuid
     if img_type == ImageTypeModel.banner:
-        if not await if_exists_in_db("Shop", "shop_uuid", owner_uuid):
-            return {"msg": f"No such shop: {owner_uuid}"}
+        if not await if_exists_in_db("Shop", "account_uuid", owner_uuid):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No shops under account: {owner_uuid}"
+            )
         return await image_io.get_file(owner_uuid, img_type)
     elif img_type == ImageTypeModel.avatar and await is_image_available(owner_uuid):
         return await image_io.get_file(owner_uuid, img_type)
