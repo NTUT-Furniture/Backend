@@ -1,9 +1,12 @@
-from fastapi import APIRouter, status, UploadFile, File
+from typing import Annotated
+
+from fastapi import APIRouter, status, UploadFile, File, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
+from model.account import Account
 from model.image import ImageUploadSuccessModel, ImageIOFailModel, ImageTypeModel
-from utils import image_io
+from utils import image_io, auth
 from utils.db_process import if_exists_in_db
 
 router = APIRouter(
@@ -23,9 +26,16 @@ router = APIRouter(
     },
     tags=["upload"]
 )
-async def upload_image(owner_uuid: str, img_type: ImageTypeModel = ImageTypeModel.avatar, file: UploadFile = File(...)):
+async def upload_image(
+        account: Annotated[
+            Account,
+            Depends(auth.get_current_active_user)],
+        img_type: ImageTypeModel = ImageTypeModel.avatar,
+        file: UploadFile = File(...)
+):
+    owner_uuid = account.account_uuid
     if img_type == ImageTypeModel.banner:
-        if not await if_exists_in_db("Shop", "shop_uuid", owner_uuid):
+        if not await if_exists_in_db("Shop", "account_uuid", owner_uuid):
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content=jsonable_encoder(
@@ -74,7 +84,13 @@ async def upload_image(owner_uuid: str, img_type: ImageTypeModel = ImageTypeMode
     },
     tags=["get"]
 )
-async def get_image(owner_uuid: str, img_type: ImageTypeModel = ImageTypeModel.avatar):
+async def get_image(
+        account: Annotated[
+            Account,
+            Depends(auth.get_current_active_user)],
+        img_type: ImageTypeModel = ImageTypeModel.avatar
+):
+    owner_uuid = account.account_uuid
     if img_type == ImageTypeModel.banner:
         if not await if_exists_in_db("Shop", "shop_uuid", owner_uuid):
             return JSONResponse(
