@@ -12,6 +12,6 @@ def register_router(app):
     router.include_router(product_router, prefix="/product")
     router.include_router(shop_router, prefix="/shop")
     router.include_router(image_router, prefix="/image")
-    router.include_router(login_router, prefix="/login")
+    router.include_router(login_router)
 
     app.include_router(router, prefix="/api")

@@ -1,8 +1,5 @@
-from typing import Annotated
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
-from starlette import status
 
 from model.auth import *
 from utils.auth import *

@@ -9,3 +9,4 @@ from fastapi.responses import JSONResponse
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from model.auth import TokenData
+from model.account import Account
