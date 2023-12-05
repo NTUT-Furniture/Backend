@@ -25,10 +25,3 @@ class CreateCouponForm(BaseModel):
 
 class ReturnCreateCoupon(SuccessModel):
     data: str
-
-@as_form
-class UpdateCouponForm(BaseModel):
-    shop_uuid: str
-    discount: Optional[int]
-    coupon_code: Optional[str]
-    expire_time: Optional[str]
