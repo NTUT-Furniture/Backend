@@ -4,14 +4,14 @@ from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm
 from model.general import SuccessModel, ErrorModel
-
+from model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm
 from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter(
     tags=["product"]
 )
+
 
 @router.get(
     "/", tags=["get"], responses={
@@ -24,7 +24,7 @@ router = APIRouter(
     }
 )
 async def get_product(
-	shop_uuid: str
+        shop_uuid: str
 ):
     sql = """
         SELECT * FROM `Product` WHERE shop_uuid = %s;
@@ -45,6 +45,7 @@ async def get_product(
         })
     )
 
+
 @router.post(
     "/", tags=["create"], responses={
         status.HTTP_200_OK: {
@@ -56,7 +57,7 @@ async def get_product(
     }
 )
 async def create_product(
-    product_form: CreateProductForm = Depends(CreateProductForm.as_form)
+        product_form: CreateProductForm = Depends(CreateProductForm.as_form)
 ):
     product_form = product_form.model_dump()
     product_id = uuid.uuid4()
@@ -80,6 +81,7 @@ async def create_product(
         })
     )
 
+
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
@@ -91,7 +93,7 @@ async def create_product(
     }
 )
 async def update_product(
-    product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
+        product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
 ):
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
