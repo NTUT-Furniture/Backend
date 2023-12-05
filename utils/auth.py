@@ -7,6 +7,7 @@ from utils import (
 
     Settings, getenv,
 
+    TokenData,
     db_process,
 )
 
@@ -32,7 +33,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, getenv("secret_key"), algorithm=getenv("algorithm"))
     return encoded_jwt
 
-def authenticate_user(email: str, password: str) -> str | None:
+def authenticate_user(email: str, password: str) -> TokenData | None:
     script = """
         SELECT 
             email,
@@ -44,8 +45,5 @@ def authenticate_user(email: str, password: str) -> str | None:
     result = db_process.get_all_results(script, (email,))
     if result:
         if verify_password(password, result[0]["pwd"]):
-            return result[0]["account_uuid"]
+            return TokenData(username=result[0]["account_uuid"])
     return None
-
-if __name__ == "__main__":
-    print(get_password_hash("fjkdl"))

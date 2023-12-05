@@ -29,8 +29,10 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
         count = cursor.execute(sql, param or ())
         if fetch:
             result = cursor.fetchall()
-            column_names = [desc[0] for desc in cursor.description]
-            result = [dict(zip(column_names, row)) for row in result]
+            if result:
+                column_names = [desc[0] for desc in cursor.description]
+                result = [dict(zip(column_names, row)) for row in result]
+
         else:
             result = count != 0
 
@@ -38,9 +40,8 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
 
     except mysql.connector.Error as e:
         print(e)
-        if not fetch:
-            if connection is not None:
-                connection.rollback()
+        if not fetch and connection is not None:
+            connection.rollback()
         result = None
 
     finally:
@@ -51,8 +52,11 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
 
     return result
 
-def get_all_results(sql, param: Optional[Tuple] = None) -> Union[Dict, bool]:
-    return execute_sql(sql, param, fetch=True)
+def get_all_results(sql: str, param: Optional[Tuple] = None) -> Union[Dict, bool]:
+    fetch = True
+    if sql.split()[0].upper() == "UPDATE" or sql.split()[0].upper() == "DELETE":
+        fetch = False
+    return execute_sql(sql, param, fetch=fetch)
 
 def execute_query(sql, param: Optional[Tuple] = None) -> bool:
     return execute_sql(sql, param)
