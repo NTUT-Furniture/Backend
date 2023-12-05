@@ -30,7 +30,6 @@ async def login_account(
         FROM `Account` WHERE email = %s AND pwd = %s;
     """
     result = get_all_results(sql, (email, pwd,))
-    print(result)
 
     if result:
         return JSONResponse(
@@ -42,11 +41,27 @@ async def login_account(
                 }
             )
         )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "fail"
-            }
+    else:
+        sql_check_account_exist = """
+            SELECT COUNT(*) FROM `Account`
+            WHERE email = %s;
+        """
+        check_account_exist = get_all_results(sql_check_account_exist, (email,))
+
+        if check_account_exist[0]["COUNT(*)"] > 0:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content=jsonable_encoder(
+                    {
+                        "msg": "password wrong"
+                    }
+                )
+            )
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content=jsonable_encoder(
+                {
+                    "msg": "email not exist"
+                }
+            )
         )
-    )
