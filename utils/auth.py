@@ -72,8 +72,10 @@ def get_account(uuid: str) -> Account | None:
 
     result = db_process.get_all_results(script, (uuid,))
     if result:
-        user_dict = result[0]
-        return Account(**user_dict)
+        account = result[0]
+        account["birthday"] = account["birthday"].strftime("%Y-%m-%d")
+        account["update_time"] = account["update_time"].strftime("%Y-%m-%d %H:%M:%S")
+        return Account(**account)
     return None
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Account:
