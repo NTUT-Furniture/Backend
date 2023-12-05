@@ -36,15 +36,15 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
 
         else:
             result = count != 0
-
-        connection.commit()
+            connection.commit()
 
     except mysql.connector.Error as e:
         if not fetch and connection is not None:
             connection.rollback()
+        # TODO: logger
         raise HTTPException(
             status_code=500,
-            detail=f"Error: {e.msg}"
+            detail=f"Some error occurred when executing sql command"
         )
 
     finally:
@@ -56,10 +56,7 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
     return result
 
 def get_all_results(sql: str, param: Optional[Tuple] = None) -> Union[Dict, bool]:
-    fetch = True
-    if sql.split()[0].upper() == "UPDATE" or sql.split()[0].upper() == "DELETE":
-        fetch = False
-    return execute_sql(sql, param, fetch=fetch)
+    return execute_sql(sql, param, True)
 
 def execute_query(sql, param: Optional[Tuple] = None) -> bool:
     return execute_sql(sql, param)

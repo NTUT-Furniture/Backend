@@ -2,13 +2,12 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from model.account import Account
 from model.general import SuccessModel, ErrorModel
 from model.shop import (
-    ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm,
+    ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm, Shop,
 )
 from utils import auth
 from utils.db_process import (
@@ -19,25 +18,13 @@ router = APIRouter(
     tags=["shop"]
 )
 
-async def prepare_response(result, status_code=status.HTTP_200_OK):
-    data = {}
-    if result:
-        data.update({"data": result})
-        message = "Success"
-    else:
-        message = "Fail"
-
-    content = jsonable_encoder({"msg": message, **data})
-
-    return JSONResponse(status_code=status_code, content=content)
-
 @router.get(
     "/", tags=["get"],
     responses={
-        200: {
+        status.HTTP_200_OK: {
             "model": ReturnShop
         },
-        404: {
+        status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
         }
     }
@@ -46,16 +33,26 @@ async def get_shop(account_uuid: str):
     sql = "SELECT * FROM `Shop` WHERE account_uuid = %s;"
     result = get_all_results(sql, (account_uuid,))
 
-    return await prepare_response(result)
+    if result:
+        shop = result[0]
+        shop["update_time"] = str(shop["update_time"])
+        return ReturnShop(data=[Shop(**shop)])
+
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "msg": f"Shop with account_uuid {account_uuid} not found"
+        }
+    )
 
 @router.post(
     "/",
     tags=["create"],
     responses={
-        200: {
+        status.HTTP_200_OK: {
             "model": ReturnCreateShop
         },
-        404: {
+        status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
         }
     }
@@ -65,8 +62,8 @@ async def create_shop(
         shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
 ):
     if if_exists_in_db("Shop", "account_uuid", account.account_uuid):
-        return await prepare_response(
-            result=f"The account {account.account_uuid} already owned a shop",
+        return JSONResponse(
+            content=f"The account {account.account_uuid} already owned a shop",
             status_code=status.HTTP_400_BAD_REQUEST
         )
     shop_id = str(uuid.uuid4())
@@ -75,18 +72,29 @@ async def create_shop(
 
     result = execute_query(sql, (shop_id, account.account_uuid) + tuple(shop_form.values()))
     if result:
-        return await prepare_response(shop_id)
-    return await prepare_response(
-        result="Something went wrong even though the query is successful.",
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "data": result
+            }
+        )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "msg": "Something went wrong."
+        }
     )
 
 @router.put(
     "/",
     tags=["update"],
     responses={
-        200: {"model": SuccessModel},
-        404: {"model": ErrorModel}
+        status.HTTP_200_OK: {
+            "model": SuccessModel
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
     }
 )
 async def update_shop(
@@ -99,8 +107,15 @@ async def update_shop(
     sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
     result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
     if result:
-        return await prepare_response(result)
-    return await prepare_response(
-        result="Something went wrong even though the query is successful.",
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "msg": "Shop updated successfully"
+            }
+        )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "msg": "Something went wrong."
+        }
     )
