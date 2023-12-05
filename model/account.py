@@ -22,9 +22,9 @@ class ReturnAccount(SuccessModel):
 @as_form
 class CreateAccountForm(BaseModel):
     name: str
+    email: str
     pwd: str
     image_url: str
-    email: Optional[str] = None
     phone: Optional[str] = None
     credit_card: Optional[str] = None
     birthday: Optional[str] = None
@@ -35,7 +35,6 @@ class ReturnCreateAccount(SuccessModel):
 
 @as_form
 class UpdateAccountForm(BaseModel):
-    account_uuid: str
     name: Optional[str]
     pwd: Optional[str]
     image_url: Optional[str]

@@ -1,21 +1,18 @@
+from datetime import datetime, timedelta
+from os import getenv
 from typing import Annotated
 
+import pytz
 from fastapi import Depends, HTTPException
-from jose import JWTError
-from starlette import status
+from fastapi import status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
-from utils import (
-    CryptContext,
-    OAuth2PasswordBearer,
-    jwt,
-
-    datetime, timedelta, pytz,
-
-    Settings, getenv,
-
-    TokenData, Account,
-    db_process,
-)
+from core.settings import Settings
+from model.account import Account
+from model.auth import TokenData
+from utils import db_process
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
