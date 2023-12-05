@@ -8,8 +8,8 @@ from utils.as_form import as_form
 class Account(BaseModel):
     account_uuid: str
     name: str
-    image_url: str
     email: str
+    image_url: str
     phone: str
     birthday: str
     address: str
@@ -22,9 +22,9 @@ class ReturnAccount(SuccessModel):
 @as_form
 class CreateAccountForm(BaseModel):
     name: str
+    email: str
     pwd: str
     image_url: str
-    email: Optional[str] = None
     phone: Optional[str] = None
     credit_card: Optional[str] = None
     birthday: Optional[str] = None
@@ -37,9 +37,9 @@ class ReturnCreateAccount(SuccessModel):
 class UpdateAccountForm(BaseModel):
     account_uuid: str
     name: Optional[str]
+    email: Optional[str]
     pwd: Optional[str]
     image_url: Optional[str]
-    email: Optional[str]
     phone: Optional[str]
     credit_card: Optional[str]
     birthday: Optional[str]
