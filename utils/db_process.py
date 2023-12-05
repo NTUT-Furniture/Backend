@@ -4,6 +4,7 @@ from typing import Union, Tuple, Dict, Optional
 
 import mysql.connector
 from dotenv import load_dotenv
+from fastapi import HTTPException
 from mysql.connector import pooling
 
 load_dotenv()
@@ -39,10 +40,12 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
         connection.commit()
 
     except mysql.connector.Error as e:
-        print(e)
         if not fetch and connection is not None:
             connection.rollback()
-        result = None
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error: {e.msg}"
+        )
 
     finally:
         if cursor is not None:

@@ -64,11 +64,12 @@ async def create_account(
                 }
             )
         )
+    # something went wrong, the result shouldn't be None as the query went successfully.
     return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=jsonable_encoder(
             {
-                "msg": "fail"
+                "msg": "Something went wrong though the query is successful."
             }
         )
     )
@@ -102,17 +103,14 @@ async def update_account(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "success"
-                }
-            )
+            content=get_account(account)
         )
+    # something went wrong, the result shouldn't be None as the query went successfully.
     return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=jsonable_encoder(
             {
-                "msg": "fail"
+                "msg": "Something went wrong though the query is successful."
             }
         )
     )
