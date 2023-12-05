@@ -6,6 +6,7 @@ from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse, FileResponse
 
+from model.account import Account
 from model.image import ImageTypeModel
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
@@ -81,3 +82,11 @@ async def get_file(owner_uuid: str, image_type: ImageTypeModel) -> Union[FileRes
             )
         )
     return FileResponse(f"{directory_path}/{image_type.value}{ext}")
+
+def get_owner_uuid(account: Account, shop_uuid: str | None = None, product_uuid: str | None = None):
+    if product_uuid is not None:
+        return product_uuid
+    elif shop_uuid is not None:
+        return shop_uuid
+    else:
+        return account.account_uuid

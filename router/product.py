@@ -12,7 +12,6 @@ router = APIRouter(
     tags=["product"]
 )
 
-
 @router.get(
     "/", tags=["get"], responses={
         status.HTTP_200_OK: {
@@ -33,18 +32,21 @@ async def get_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({
-                "msg": "Success",
-                "data": result
-            })
+            content=jsonable_encoder(
+                {
+                    "msg": "Success",
+                    "data": result
+                }
+            )
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "Fail"
-        })
+        content=jsonable_encoder(
+            {
+                "msg": "Fail"
+            }
+        )
     )
-
 
 @router.post(
     "/", tags=["create"], responses={
@@ -69,18 +71,21 @@ async def create_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({
-                "msg": "Success",
-                "data": id
-            })
+            content=jsonable_encoder(
+                {
+                    "msg": "Success",
+                    "data": id
+                }
+            )
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "Fail"
-        })
+        content=jsonable_encoder(
+            {
+                "msg": "Fail"
+            }
+        )
     )
-
 
 @router.put(
     "/", tags=["update"], responses={
@@ -106,13 +111,17 @@ async def update_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder({
-                "msg": "Success"
-            })
+            content=jsonable_encoder(
+                {
+                    "msg": "Success"
+                }
+            )
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder({
-            "msg": "Fail"
-        })
+        content=jsonable_encoder(
+            {
+                "msg": "Fail"
+            }
+        )
     )
