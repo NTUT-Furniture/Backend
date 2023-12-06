@@ -1,13 +1,14 @@
 import uuid
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.account import ReturnAccount, CreateAccountForm, ReturnCreateAccount, UpdateAccountForm
+import utils.auth as auth
+from model.account import ReturnAccount, CreateAccountForm, ReturnCreateAccount, UpdateAccountForm, Account
 from model.general import SuccessModel, ErrorModel
-
-from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
+from utils.db_process import execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter(
     tags=["account"],
@@ -21,48 +22,15 @@ router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
         }
-    }
+    },
+    response_model=Account
 )
 async def get_account(
-        account_uuid: str = None
+        account: Annotated[
+            Account,
+            Depends(auth.get_current_active_user)]
 ):
-    sql = """
-        SELECT
-            account_uuid,
-            name,
-            image_url,
-            email,
-            phone,
-            birthday,
-            address,
-            is_active,
-            update_time
-        FROM `Account`
-    """
-    if account_uuid is not None:
-        sql += " WHERE account_uuid = %s;"
-        result = get_all_results(sql, (account_uuid,))
-    else:
-        sql += ";"
-        result = get_all_results(sql)
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "success",
-                    "data": result
-                }
-            )
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "fail"
-            }
-        )
-    )
+    return account
 
 @router.post(
     "/", tags=["create"], responses={
@@ -75,13 +43,14 @@ async def get_account(
     }
 )
 async def create_account(
-    account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
+        account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
 ):
     account_form = account_form.model_dump()
+    account_form["pwd"] = auth.get_password_hash(account_form["pwd"])
     account_id = uuid.uuid4()
     sql = """
         INSERT INTO `Account`
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
         );
     """
     result = execute_query(sql, (str(account_id),) + tuple(account_form.values()))
@@ -95,11 +64,12 @@ async def create_account(
                 }
             )
         )
+    # something went wrong, the result shouldn't be None as the query went successfully.
     return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(
             {
-                "msg": "fail"
+                "msg": "Something went wrong though the query."
             }
         )
     )
@@ -115,7 +85,12 @@ async def create_account(
     }
 )
 async def update_account(
-    account_form: UpdateAccountForm = Depends(UpdateAccountForm.as_form)
+        account_form: Annotated[
+            UpdateAccountForm,
+            Depends(UpdateAccountForm.as_form)],
+        account: Annotated[
+            Account,
+            Depends(auth.get_current_active_user)]
 ):
     account_form = account_form.model_dump()
     account_form = dict_delete_none(account_form)
@@ -124,21 +99,18 @@ async def update_account(
         UPDATE `Account` SET {sql_set_text} 
         WHERE account_uuid = %s;
     """
-    result = execute_query(sql, (sql_set_values + (account_form["account_uuid"],)))
+    result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "success"
-                }
-            )
+            content=get_account(account)
         )
+    # something went wrong, the result shouldn't be None as the query went successfully.
     return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(
             {
-                "msg": "fail"
+                "msg": "Something went wrong though the query is successful."
             }
         )
     )
