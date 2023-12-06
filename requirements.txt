@@ -6,7 +6,3 @@ mysql-connector-python~=8.2.0
 python-dotenv~=1.0.0
 python-multipart
 starlette~=0.27.0
-python-jose[cryptography]~=3.3.0
-passlib~=1.7.4
-pytz~=2023.3.post1
-bcrypt~=3.2.0

@@ -12,5 +12,4 @@ Settings: Final = {
     "api_prefix": str(config["SERVER"]["api_prefix"]),
     "api_docs": str(config["SERVER"]["api_docs"]),
     "api_redoc": str(config["SERVER"]["api_redoc"]),
-    "access_token_expire_minutes": int(config["JWT"]["access_token_expire_minutes"]),
 }
