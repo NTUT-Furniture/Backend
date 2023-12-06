@@ -33,7 +33,6 @@ class ReturnCreateAccount(SuccessModel):
 
 @as_form
 class UpdateAccountForm(BaseModel):
-    account_uuid: str
     name: Optional[str]
     email: Optional[str]
     pwd: Optional[str]
