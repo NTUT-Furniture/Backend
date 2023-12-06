@@ -1,14 +1,12 @@
 import uuid
-from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.account import Account
-from model.general import SuccessModel, ErrorModel
 from model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm
-from utils import auth
+from model.general import SuccessModel, ErrorModel
+
 from utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter(
@@ -26,7 +24,7 @@ router = APIRouter(
     }
 )
 async def get_product(
-        shop_uuid: str
+	shop_uuid: str
 ):
     sql = """
         SELECT * FROM `Product` WHERE shop_uuid = %s;
@@ -35,20 +33,16 @@ async def get_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success",
-                    "data": result
-                }
-            )
+            content=jsonable_encoder({
+                "msg": "Success",
+                "data": result
+            })
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
+        content=jsonable_encoder({
+            "msg": "Fail"
+        })
     )
 
 @router.post(
@@ -62,22 +56,10 @@ async def get_product(
     }
 )
 async def create_product(
-        account: Annotated[Account, Depends(auth.get_current_active_user)],
-        product_form: CreateProductForm = Depends(CreateProductForm.as_form)
+    product_form: CreateProductForm = Depends(CreateProductForm.as_form)
 ):
-    shop_uuid = product_form.shop_uuid
-    if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder(
-                {
-                    "msg": f"Account {account.account_uuid} does not own shop {shop_uuid}"
-                }
-            )
-        )
-
     product_form = product_form.model_dump()
-    product_id = str(uuid.uuid4())
+    product_id = uuid.uuid4()
     sql = """
         INSERT INTO `Product`
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT);
@@ -86,20 +68,16 @@ async def create_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success",
-                    "data": id
-                }
-            )
+            content=jsonable_encoder({
+                "msg": "Success",
+                "data": id
+            })
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
+        content=jsonable_encoder({
+            "msg": "Fail"
+        })
     )
 
 @router.put(
@@ -113,19 +91,8 @@ async def create_product(
     }
 )
 async def update_product(
-        account: Annotated[Account, Depends(auth.get_current_active_user)],
-        product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
+    product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
 ):
-    product_uuid = product_form.product_uuid
-    if not await auth.if_account_owns_product(account.account_uuid, product_uuid):
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder(
-                {
-                    "msg": f"Account {account.account_uuid} does not own product {product_uuid}"
-                }
-            )
-        )
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
     sql_set_text, sql_set_values = dict_to_sql_command(product_form)
@@ -137,17 +104,13 @@ async def update_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success"
-                }
-            )
+            content=jsonable_encoder({
+                "msg": "Success"
+            })
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
+        content=jsonable_encoder({
+            "msg": "Fail"
+        })
     )
