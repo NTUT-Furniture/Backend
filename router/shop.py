@@ -79,7 +79,7 @@ async def create_shop(
             }
         )
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "msg": "Something went wrong."
         }
@@ -114,7 +114,7 @@ async def update_shop(
             }
         )
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
             "msg": "Something went wrong."
         }

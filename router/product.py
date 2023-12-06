@@ -86,12 +86,10 @@ async def create_product(
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success",
-                    "data": id
-                }
-            )
+            content={
+                "msg": "Success",
+                "data": product_id
+            }
         )
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -117,7 +115,8 @@ async def update_product(
         product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
 ):
     product_uuid = product_form.product_uuid
-    if not await auth.if_account_owns_product(account.account_uuid, product_uuid):
+    shop_uuid = product_form.shop_uuid
+    if not await auth.if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=jsonable_encoder(

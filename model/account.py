@@ -9,7 +9,6 @@ class Account(BaseModel):
     account_uuid: str
     name: str
     email: str
-    image_url: str
     phone: str
     birthday: str
     address: str
@@ -24,7 +23,6 @@ class CreateAccountForm(BaseModel):
     name: str
     email: str
     pwd: str
-    image_url: str
     phone: Optional[str] = None
     credit_card: Optional[str] = None
     birthday: Optional[str] = None
@@ -38,7 +36,6 @@ class UpdateAccountForm(BaseModel):
     name: Optional[str]
     email: Optional[str]
     pwd: Optional[str]
-    image_url: Optional[str]
     phone: Optional[str]
     credit_card: Optional[str]
     birthday: Optional[str]

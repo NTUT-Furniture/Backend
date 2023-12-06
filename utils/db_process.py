@@ -6,6 +6,7 @@ import mysql.connector
 from dotenv import load_dotenv
 from fastapi import HTTPException
 from mysql.connector import pooling
+from starlette import status
 
 load_dotenv()
 
@@ -42,8 +43,9 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
         if not fetch and connection is not None:
             connection.rollback()
         # TODO: logger
+        print(e)
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Some error occurred when executing sql command"
         )
 

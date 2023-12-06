@@ -33,7 +33,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = utc_plus_8 + timedelta(minutes=Settings["access_token_expire_minutes"])
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, getenv("secret_key"), algorithm=getenv("algorithm"))
+    encoded_jwt = jwt.encode(to_encode, getenv("SECRET_KEY"), algorithm=getenv("ALGORITHM"))
     return encoded_jwt
 
 def authenticate_user(email: str, password: str) -> TokenData | None:
@@ -56,7 +56,6 @@ def get_account(uuid: str) -> Account | None:
         SELECT
             account_uuid,
             name,
-            image_url,
             email,
             phone,
             birthday,
@@ -82,7 +81,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Acc
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, getenv("secret_key"), algorithms=[getenv("algorithm")])
+        payload = jwt.decode(token, getenv("SECRET_KEY"), algorithms=[getenv("ALGORITHM")])
         user_uuid: str = payload.get("sub")
         if user_uuid is None:
             raise credentials_exception
@@ -126,7 +125,8 @@ async def if_shop_owns_product(
 
 async def if_account_owns_product(
         account_uuid: str,
+        shop_uuid: str,
         product_uuid: str
 ) -> bool:
-    return await if_account_owns_shop(account_uuid, product_uuid) and \
-        await if_shop_owns_product(account_uuid, product_uuid)
+    return await if_account_owns_shop(account_uuid, shop_uuid) and \
+        await if_shop_owns_product(shop_uuid, product_uuid)

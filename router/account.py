@@ -50,7 +50,7 @@ async def create_account(
     account_id = uuid.uuid4()
     sql = """
         INSERT INTO `Account`
-        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
+        VALUES(%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT
         );
     """
     result = execute_query(sql, (str(account_id),) + tuple(account_form.values()))
@@ -66,10 +66,10 @@ async def create_account(
         )
     # something went wrong, the result shouldn't be None as the query went successfully.
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(
             {
-                "msg": "Something went wrong though the query is successful."
+                "msg": "Something went wrong though the query."
             }
         )
     )
@@ -107,7 +107,7 @@ async def update_account(
         )
     # something went wrong, the result shouldn't be None as the query went successfully.
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content=jsonable_encoder(
             {
                 "msg": "Something went wrong though the query is successful."

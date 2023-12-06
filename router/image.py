@@ -60,7 +60,7 @@ async def upload_image(
                     )
                 return await image_io.save_file(file, shop_uuid, img_type)
         elif await if_exists_in_db("Product", "product_uuid", product_uuid):
-            if not await if_account_owns_product(account.account_uuid, product_uuid):
+            if not await if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=f"Account: {account.account_uuid} doesn't own shop: {shop_uuid} or \
