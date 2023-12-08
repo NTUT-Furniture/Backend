@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
 from typing import Optional, List
 
-from model.general import SuccessModel
+from pydantic import BaseModel
 
+from model.general import SuccessModel
 from utils.as_form import as_form
 
 class Product(BaseModel):
@@ -36,6 +35,7 @@ class ReturnCreateProduct(SuccessModel):
 @as_form
 class UpdateProductForm(BaseModel):
     product_uuid: str
+    shop_uuid: str
     name: Optional[str]
     stock: Optional[int]
     image_url: Optional[str]

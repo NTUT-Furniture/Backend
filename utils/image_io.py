@@ -43,9 +43,10 @@ async def save_file(file: Optional[UploadFile], owner_id: str, image_type: Image
         with open(os.path.join(directory_path, filename), "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
     except Exception as e:
+        # TODO: log the error
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=f"Error when saving file: {e}"
+            content=f"Error when saving file"
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
