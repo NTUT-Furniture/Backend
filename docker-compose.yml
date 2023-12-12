@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: database
+    build: 
+      context: .
+      dockerfile: Dockerfile-db
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: NFT
+      MYSQL_USER: backend
+      MYSQL_PASSWORD: backend
+    volumes:
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+    expose:
+      - "3306:3306"
+  fastapi:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: mysql
+      DB_USER: backend
+      DB_PASSWORD: backend
+      DB_NAME: NFT
+    expose:
+      - "8000:8000"
+    links:
+      - mysql
+
+# networks:
+#   nft_network:
+#     driver: bridge
+#     driver_opts:
+#       com.docker.network.bridge.name: nft_network
+#       com.docker.network.bridge.enable_ip_masquerade: "true"
+#       internal: "false"  # This makes the network external

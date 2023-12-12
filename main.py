@@ -8,4 +8,5 @@ if __name__ == "__main__":
         port=Settings["port"],
         reload=True,
         workers=Settings["workers"],
+        forwarded_allow_ips=["*"]
     )

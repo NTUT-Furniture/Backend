@@ -14,6 +14,8 @@ from utils.db_process import (
     get_all_results, execute_query, dict_to_sql_command, dict_delete_none, if_exists_in_db,
 )
 
+from utils.response_process import send_response
+
 router = APIRouter(
     tags=["shop"]
 )
@@ -29,7 +31,9 @@ router = APIRouter(
         }
     }
 )
-async def get_shop(account_uuid: str):
+async def get_shop(
+        account_uuid: str
+):
     sql = "SELECT * FROM `Shop` WHERE account_uuid = %s;"
     result = get_all_results(sql, (account_uuid,))
 
@@ -37,13 +41,11 @@ async def get_shop(account_uuid: str):
         shop = result[0]
         shop["update_time"] = str(shop["update_time"])
         return ReturnShop(data=[Shop(**shop)])
-
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={
-            "msg": f"Shop with account_uuid {account_uuid} not found"
-        }
+    return send_response(
+        msg=f"Shop with account_uuid {account_uuid} not found",
+        status_code=status.HTTP_404_NOT_FOUND
     )
+
 
 @router.post(
     "/",
@@ -68,21 +70,17 @@ async def create_shop(
         )
     shop_id = str(uuid.uuid4())
     shop_form = shop_form.model_dump()
-    sql = f"INSERT INTO `Shop` VALUES (%s, %s,  %s, %s, %s, DEFAULT);"
+    sql = "INSERT INTO `Shop` VALUES (%s, %s,  %s, %s, %s, DEFAULT);"
 
     result = execute_query(sql, (shop_id, account.account_uuid) + tuple(shop_form.values()))
     if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "data": result
-            }
+        return send_response(
+            msg="create shop successfully",
+            data=shop_id
         )
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={
-            "msg": "Something went wrong."
-        }
+    return send_response(
+        msg="create shop failed",
+        status_code=status.HTTP_400_BAD_REQUEST
     )
 
 @router.put(
@@ -107,15 +105,10 @@ async def update_shop(
     sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
     result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
     if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "msg": "Shop updated successfully"
-            }
+        return send_response(
+            msg="update shop successfully"
         )
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={
-            "msg": "Something went wrong."
-        }
+    return send_response(
+        msg="update shop failed",
+        status_code=status.HTTP_400_BAD_REQUEST
     )
