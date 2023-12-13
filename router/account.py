@@ -5,13 +5,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
+import utils.auth as auth
 from model.account import ReturnAccount, CreateAccountForm, ReturnCreateAccount, UpdateAccountForm, Account
 from model.general import SuccessModel, ErrorModel
-
-import utils.auth as auth
-
 from utils.db_process import execute_query, dict_to_sql_command, dict_delete_none
-from utils.response_process import send_response
 
 router = APIRouter(
     tags=["account"],
@@ -58,13 +55,23 @@ async def create_account(
     """
     result = execute_query(sql, (str(account_id),) + tuple(account_form.values()))
     if result:
-        return send_response(
-            msg="success",
-            data=account_id
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder(
+                {
+                    "msg": "success",
+                    "data": account_id
+                }
+            )
         )
-    return send_response(
-        msg="Something went wrong.",
-        status_code=status.HTTP_400_BAD_REQUEST
+    # something went wrong, the result shouldn't be None as the query went successfully.
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=jsonable_encoder(
+            {
+                "msg": "Something went wrong though the query."
+            }
+        )
     )
 
 @router.put(
@@ -94,10 +101,16 @@ async def update_account(
     """
     result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
     if result:
-        return send_response(
-            msg="success"
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=get_account(account)
         )
-    return send_response(
-        msg="Something went wrong",
-        status_code=status.HTTP_400_BAD_REQUEST
+    # something went wrong, the result shouldn't be None as the query went successfully.
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content=jsonable_encoder(
+            {
+                "msg": "Something went wrong though the query is successful."
+            }
+        )
     )
