@@ -14,11 +14,7 @@ pip install -r requirements.txt
 python3 main.py
 ```
 ## About Database
-```commandline
-bcz our database is fucked in Azure and GCP😂
-we have no choice but to use docker to set up our database
-make sure to host database before running backend
-```
+
 ### Host Database Server
 ```bash
 docker build -t dbimg .
