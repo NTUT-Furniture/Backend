@@ -13,6 +13,14 @@ venv/Scripts/activate
 pip install -r requirements.txt
 python3 main.py
 ```
+## About Database
+
+### Host Database Server
+```bash
+docker build -t dbimg .
+docker run -d -t -p 3306:3306 --name mysql dbimg
+```
+[Having trouble?](https://hackmd.io/uumppNC3QMuMYnxqi8PkIQ)
 
 ## environment variables
 
