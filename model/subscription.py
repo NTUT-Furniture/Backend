@@ -9,7 +9,7 @@ class Subscription(BaseModel):
     account_uuid: str
     shop_uuid: str
 
-class ReturnProduct(SuccessModel):
+class ReturnSubscription(SuccessModel):
     data: List[Subscription]
 
 @as_form

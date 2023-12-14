@@ -6,6 +6,7 @@ from .product import router as product_router
 from .shop import router as shop_router
 from .coupon import router as coupon_router
 from .login import router as login_router
+from .subscription import router as subscription_router
 
 def register_router(app):
     router = APIRouter()
@@ -15,5 +16,6 @@ def register_router(app):
     router.include_router(image_router, prefix="/image")
     router.include_router(coupon_router, prefix="/coupon")
     router.include_router(login_router)
+    router.include_router(subscription_router, prefix="/subscription")
 
     app.include_router(router, prefix="/api")
