@@ -13,6 +13,16 @@ venv/Scripts/activate
 pip install -r requirements.txt
 python3 main.py
 ```
+## Docker
+   ### run
+   ```bash
+   docker-compose up
+   ```
+   ### clean all
+   make sure no container is running
+   ```bash
+   docker system prune -a
+   ```
 
 ## environment variables
 
