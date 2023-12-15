@@ -1,22 +1,19 @@
-from typing import Optional, List
+from typing import Optional
 
 from pydantic import BaseModel
 
-from model.general import SuccessModel
 from utils.as_form import as_form
 
 class Account(BaseModel):
     account_uuid: str
     name: str
     email: str
-    phone: str
-    birthday: str
-    address: str
+    phone: Optional[str]
+    birthday: Optional[str]
+    address: Optional[str]
     is_active: int
+    role: int
     update_time: str
-
-class ReturnAccount(SuccessModel):
-    data: List[Account]
 
 @as_form
 class CreateAccountForm(BaseModel):
@@ -27,9 +24,6 @@ class CreateAccountForm(BaseModel):
     credit_card: Optional[str] = None
     birthday: Optional[str] = None
     address: Optional[str] = None
-
-class ReturnCreateAccount(SuccessModel):
-    data: str
 
 @as_form
 class UpdateAccountForm(BaseModel):
