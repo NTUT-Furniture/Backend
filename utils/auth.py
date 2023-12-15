@@ -61,16 +61,20 @@ def get_account(uuid: str) -> Account | None:
             birthday,
             address,
             is_active,
+            role,
             update_time
         FROM Account
-        WHERE account_uuid = %s;            
+        WHERE account_uuid = %s
+        limit 1;         
    """
 
     result = db_process.get_all_results(script, (uuid,))
     if result:
         account = result[0]
-        account["birthday"] = account["birthday"].strftime("%Y-%m-%d")
-        account["update_time"] = account["update_time"].strftime("%Y-%m-%d %H:%M:%S")
+        if account["birthday"]:
+            account["birthday"] = account["birthday"].strftime("%Y-%m-%d")
+        if account["update_time"]:
+            account["update_time"] = account["update_time"].strftime("%Y-%m-%d %H:%M:%S")
         return Account(**account)
     return None
 
