@@ -55,7 +55,7 @@ def authenticate_user(email: str, password: str) -> TokenData | None:
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Inactive user"
                 )
-            if result[0]["role"] == "1":
+            if result[0]["role"] == 1:
                 return TokenData(uuid=result[0]["account_uuid"], role="admin")
             return TokenData(uuid=result[0]["account_uuid"])
     return None

@@ -15,6 +15,9 @@ class Account(BaseModel):
     role: int
     update_time: str
 
+class AccountList(BaseModel):
+    accounts: list[Account]
+
 @as_form
 class CreateAccountForm(BaseModel):
     name: str

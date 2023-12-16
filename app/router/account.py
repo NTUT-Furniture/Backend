@@ -4,9 +4,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 
 import app.utils.auth as auth
-from app.model.account import CreateAccountForm, UpdateAccountForm, Account
+import app.utils.datetime2str as timedate2str
+from app.model.account import CreateAccountForm, UpdateAccountForm, Account, AccountList
 from app.model.general import SuccessModel
-from app.utils.db_process import execute_query, dict_to_sql_command, dict_delete_none
+from app.utils.db_process import execute_query, dict_to_sql_command, dict_delete_none, get_all_results
 
 router = APIRouter(
     tags=["account"],
@@ -15,7 +16,8 @@ router = APIRouter(
 @router.get(
     "/", tags=["get"], responses={
         status.HTTP_200_OK: {
-            "model": Account
+            "description": "Get current account info. If a admin token is provided, return all accounts.",
+            "model": Account | AccountList
         },
     },
 )
@@ -24,6 +26,32 @@ async def get_account(
             Account,
             Depends(auth.get_current_active_user)]
 ):
+    if account.role == 1:
+        sql = """
+            SELECT 
+                account_uuid,
+                name,
+                email,
+                phone,
+                birthday,
+                address,
+                is_active,
+                role,
+                update_time
+            FROM Account;
+        """
+        result: dict = get_all_results(sql)
+        if result:
+            # process the result as birthday and update_time are datetime objects.
+            for account in result:
+                if account["birthday"]:
+                    account["birthday"] = timedate2str.datetime2str(account["birthday"])
+                if account["update_time"]:
+                    account["update_time"] = timedate2str.datetime2str(account["update_time"])
+
+            return AccountList(accounts=[Account(**account) for account in result])
+        else:
+            raise HTTPException(status_code=400, detail="Something went wrong.")
     return account
 
 @router.post(
