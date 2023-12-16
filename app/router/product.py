@@ -1,7 +1,7 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -28,28 +28,25 @@ router = APIRouter(
 async def get_product(
         shop_uuid: str
 ):
-    sql = """
-        SELECT * FROM `Product` WHERE shop_uuid = %s;
-    """
-    result = get_all_results(sql, (shop_uuid,))
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success",
-                    "data": result
-                }
+    try:
+        sql = """
+            SELECT * FROM `Product` WHERE shop_uuid = %s;
+        """
+        result = get_all_results(sql, (shop_uuid,))
+        if result:
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content=jsonable_encoder(
+                    {
+                        "msg": "Success",
+                        "data": result
+                    }
+                )
             )
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
-    )
+        else:
+            raise HTTPException(status_code=400, detail="Something went wrong.")
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 @router.post(
     "/", tags=["create"], responses={
@@ -65,48 +62,36 @@ async def create_product(
         account: Annotated[Account, Depends(auth.get_current_active_user)],
         product_form: CreateProductForm = Depends(CreateProductForm.as_form)
 ):
-    shop_uuid = product_form.shop_uuid
-    if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder(
-                {
-                    "msg": f"Account {account.account_uuid} does not own shop {shop_uuid}"
-                }
+    try:
+        shop_uuid = product_form.shop_uuid
+        if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content=jsonable_encoder(
+                    {
+                        "msg": f"Account {account.account_uuid} does not own shop {shop_uuid}"
+                    }
+                )
             )
-        )
 
-    product_form = product_form.model_dump()
-    product_id = str(uuid.uuid4())
-    sql = """
-        INSERT INTO `Product`
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT);
-    """
-    result = execute_query(sql, (str(product_id),) + tuple(product_form.values()))
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "msg": "Success",
-                "data": product_id
-            }
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
-    )
+        product_form = product_form.model_dump()
+        product_id = str(uuid.uuid4())
+        sql = """
+            INSERT INTO `Product`
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT);
+        """
+        result = execute_query(sql, (str(product_id),) + tuple(product_form.values()))
+        if result:
+            return SuccessModel(data=product_id)
+        else:
+            raise HTTPException(status_code=400, detail="Something went wrong.")
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
 
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
             "model": SuccessModel
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorModel
         }
     }
 )
@@ -114,39 +99,22 @@ async def update_product(
         account: Annotated[Account, Depends(auth.get_current_active_user)],
         product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
 ):
-    product_uuid = product_form.product_uuid
-    shop_uuid = product_form.shop_uuid
-    if not await auth.if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder(
-                {
-                    "msg": f"Account {account.account_uuid} does not own product {product_uuid}"
-                }
-            )
-        )
-    product_form = product_form.model_dump()
-    product_form = dict_delete_none(product_form)
-    sql_set_text, sql_set_values = dict_to_sql_command(product_form)
-    sql = f"""
-        UPDATE `Product` SET {sql_set_text}
-        WHERE product_uuid = %s;
-    """
-    result = execute_query(sql, (sql_set_values + (product_form["product_uuid"],)))
-    if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success"
-                }
-            )
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
-    )
+    try:
+        product_uuid = product_form.product_uuid
+        shop_uuid = product_form.shop_uuid
+        if not await auth.if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
+            raise HTTPException(status_code=400, detail=f"Account {account.account_uuid} does not own product {product_uuid}")
+        product_form = product_form.model_dump()
+        product_form = dict_delete_none(product_form)
+        sql_set_text, sql_set_values = dict_to_sql_command(product_form)
+        sql = f"""
+            UPDATE `Product` SET {sql_set_text}
+            WHERE product_uuid = %s;
+        """
+        result = execute_query(sql, (sql_set_values + (product_form["product_uuid"],)))
+        if result:
+            return SuccessModel(msg="success")
+        else:
+            raise HTTPException(status_code=400, detail="Something went wrong.")
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
