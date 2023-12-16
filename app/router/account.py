@@ -4,9 +4,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 
 import app.utils.auth as auth
-import app.utils.datetime2str as timedate2str
 from app.model.account import CreateAccountForm, UpdateAccountForm, Account, AccountList
-from app.model.general import SuccessModel
+from app.model.general import SuccessModel, ErrorModel
 from app.utils.db_process import execute_query, dict_to_sql_command, dict_delete_none, get_all_results
 
 router = APIRouter(
@@ -16,12 +15,28 @@ router = APIRouter(
 @router.get(
     "/", tags=["get"], responses={
         status.HTTP_200_OK: {
-            "description": "Get current account info. If a admin token is provided, return all accounts.",
-            "model": Account | AccountList
+            "model": Account
         },
     },
 )
 async def get_account(
+        account: Annotated[
+            Account,
+            Depends(auth.get_current_active_user)]
+):
+    return account
+
+@router.get(
+    path="/all", tags=["get"], responses={
+        status.HTTP_200_OK: {
+            "model": AccountList
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorModel
+        },
+    },
+)
+async def get_all_accounts(
         account: Annotated[
             Account,
             Depends(auth.get_current_active_user)]
@@ -42,22 +57,28 @@ async def get_account(
         """
         result: dict = get_all_results(sql)
         if result:
-            # process the result as birthday and update_time are datetime objects.
             for account in result:
                 if account["birthday"]:
-                    account["birthday"] = timedate2str.datetime2str(account["birthday"])
+                    account["birthday"] = str(account["birthday"])
                 if account["update_time"]:
-                    account["update_time"] = timedate2str.datetime2str(account["update_time"])
+                    account["update_time"] = str(account["update_time"])
 
             return AccountList(accounts=[Account(**account) for account in result])
         else:
             raise HTTPException(status_code=400, detail="Something went wrong.")
-    return account
+    else:
+        raise HTTPException(status_code=401, detail="You are not an admin.")
 
 @router.post(
     "/", tags=["create"], responses={
-        status.HTTP_200_OK: {
+        status.HTTP_201_CREATED: {
             "model": SuccessModel
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ErrorModel
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorModel
         },
     }
 )
@@ -65,29 +86,39 @@ async def create_account(
         account_form: CreateAccountForm = Depends(CreateAccountForm.as_form)
 ):
     try:
+        form = account_form.model_dump()
         account_form = account_form.model_dump()
-        account_form["pwd"] = auth.get_password_hash(account_form["pwd"])
+        form["pwd"] = auth.get_password_hash(account_form["pwd"])
         account_id = str(uuid.uuid4())
         sql = """
             INSERT INTO `Account`
             VALUES(%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT, DEFAULT
             );
         """
-        result = execute_query(sql, ((account_id,) + (tuple(account_form.values()))))
+        result = execute_query(sql, ((account_id,) + (tuple(form.values()))))
         if result:
-            return SuccessModel(data=account_id)
+            return account_form
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail=ErrorModel(msg="Something went wrong."))
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        raise HTTPException(status_code=422, detail=ErrorModel(msg=str(e)))
 
 @router.put(
     path="/",
     description="Update current logged in account info. "
-                "If a admin token is provided, they may update other accounts with an uuid.",
+                "If a admin token is provided, they may update other accounts by providing corresponding uuid.",
     tags=["update"], responses={
         status.HTTP_200_OK: {
-            "model": SuccessModel
+            "model": UpdateAccountForm
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorModel
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ErrorModel
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorModel
         },
     }
 )
@@ -101,22 +132,25 @@ async def update_account(
         account_uuid: str | None = None
 ):
     try:
-        account_form = account_form.model_dump()
-        account_form = dict_delete_none(account_form)
-        if 'pwd' in account_form:
-            account_form['pwd'] = auth.get_password_hash(account_form['pwd'])
-        sql_set_text, sql_set_values = dict_to_sql_command(account_form)
+        form = account_form.model_dump()
+        form = dict_delete_none(form)
+        if 'pwd' in form:
+            form['pwd'] = auth.get_password_hash(form['pwd'])
+        sql_set_text, sql_set_values = dict_to_sql_command(form)
         sql = f"""
             UPDATE `Account` SET {sql_set_text} 
             WHERE account_uuid = %s;
         """
-        if account_uuid and account.role == 1:
-            result = execute_query(sql, (sql_set_values + (account_uuid,)))
+        if account_uuid:
+            if account.role == 1:
+                result = execute_query(sql, ((account_uuid,) + sql_set_values))
+            else:
+                raise HTTPException(status_code=401, detail=ErrorModel(msg="You are not an admin."))
         else:
-            result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
+            result = execute_query(sql, ((account.account_uuid,) + sql_set_values))
         if result:
-            return SuccessModel(msg="success")
+            return account_form
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=500, detail=ErrorModel(msg="Something went wrong."))
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+        raise HTTPException(status_code=422, detail=ErrorModel(msg=str(e)))
