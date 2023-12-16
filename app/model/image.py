@@ -2,7 +2,7 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from model.general import SuccessModel
+from app.model.general import SuccessModel
 
 class ImageTypeModel(str, Enum):
     avatar = "avatar"

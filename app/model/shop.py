@@ -2,9 +2,9 @@ from pydantic import BaseModel
 
 from typing import Optional, List
 
-from model.general import SuccessModel
+from app.model.general import SuccessModel
 
-from utils.as_form import as_form
+from app.utils.as_form import as_form
 
 class Shop(BaseModel):
     shop_uuid: str

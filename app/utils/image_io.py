@@ -6,7 +6,7 @@ from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse, FileResponse
 
-from model.image import ImageTypeModel
+from app.model.image import ImageTypeModel
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 

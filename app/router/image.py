@@ -3,11 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, status, UploadFile, File, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
-from model.account import Account
-from model.image import ImageUploadSuccessModel, ImageIOFailModel, ImageTypeModel
-from utils import image_io, auth
-from utils.auth import if_account_owns_shop, if_account_owns_product
-from utils.db_process import if_exists_in_db
+from app.model.account import Account
+from app.model.image import ImageUploadSuccessModel, ImageIOFailModel, ImageTypeModel
+from app.utils import image_io
+from app.utils import auth
+from app.utils.auth import if_account_owns_shop, if_account_owns_product
+from app.utils.db_process import if_exists_in_db
 
 router = APIRouter(
     tags=["image", "product", "account", "shop"],

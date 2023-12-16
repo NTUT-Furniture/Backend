@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.coupon import ReturnCoupon, CreateCouponForm, ReturnCreateCoupon
-from model.general import ErrorModel
+from app.model.coupon import ReturnCoupon, CreateCouponForm, ReturnCreateCoupon
+from app.model.general import ErrorModel
 
-from utils.db_process import get_all_results, execute_query
+from app.utils.db_process import get_all_results, execute_query
 
 router = APIRouter(
     tags=["coupon"]
