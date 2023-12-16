@@ -82,7 +82,10 @@ async def create_account(
         raise HTTPException(status_code=422, detail=str(e))
 
 @router.put(
-    "/", tags=["update"], responses={
+    path="/",
+    description="Update current logged in account info. "
+                "If a admin token is provided, they may update other accounts with an uuid.",
+    tags=["update"], responses={
         status.HTTP_200_OK: {
             "model": SuccessModel
         },
@@ -94,7 +97,8 @@ async def update_account(
             Depends(UpdateAccountForm.as_form)],
         account: Annotated[
             Account,
-            Depends(auth.get_current_active_user)]
+            Depends(auth.get_current_active_user)],
+        account_uuid: str | None = None
 ):
     try:
         account_form = account_form.model_dump()
@@ -106,7 +110,10 @@ async def update_account(
             UPDATE `Account` SET {sql_set_text} 
             WHERE account_uuid = %s;
         """
-        result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
+        if account_uuid and account.role == 1:
+            result = execute_query(sql, (sql_set_values + (account_uuid,)))
+        else:
+            result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
         if result:
             return SuccessModel(msg="success")
         else:
