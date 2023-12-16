@@ -109,13 +109,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Acc
 async def get_current_active_user(
         current_user: Annotated[Account, Depends(get_current_user)]
 ):
-
-    # TODO: Add disabled column to Account table
-    # if current_user.disabled:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail="Inactive user"
-    #     )
+    if current_user.is_active != 1:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Inactive user"
+        )
     return current_user
 
 async def if_account_owns_shop(
