@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from model.general import ErrorModel
-from model.subscription import ReturnSubscription, CreateSubscriptionForm, ReturnCreateSubscription
-from utils.db_process import get_all_results, execute_query
+from app.model.general import ErrorModel
+from app.model.subscription import ReturnSubscription, CreateSubscriptionForm, ReturnCreateSubscription
+from app.utils.db_process import get_all_results, execute_query
 
 router = APIRouter(
     tags=["subscription"]

@@ -12,3 +12,19 @@ services:
       - ./sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
+    networks:
+      - NFT_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: dockerFile-backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    networks:
+      - NFT_network
+networks:
+  NFT_network:
+    driver: bridge

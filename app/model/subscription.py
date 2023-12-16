@@ -2,8 +2,8 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-from model.general import SuccessModel
-from utils.as_form import as_form
+from app.model.general import SuccessModel
+from app.utils.as_form import as_form
 
 class Subscription(BaseModel):
     account_uuid: str
