@@ -141,17 +141,18 @@ async def update_account(
         if 'pwd' in form:
             form['pwd'] = auth.get_password_hash(form['pwd'])
         sql_set_text, sql_set_values = dict_to_sql_command(form)
+
         sql = f"""
-            UPDATE `Account` SET {sql_set_text} 
+            UPDATE `Account` SET {sql_set_text},  update_time = CURRENT_TIMESTAMP
             WHERE account_uuid = %s;
         """
         if account_uuid:
             if account.role == 1:
-                result = execute_query(sql, ((account_uuid,) + sql_set_values))
+                result = execute_query(sql, (sql_set_values + (account_uuid,)))
             else:
                 raise HTTPException(status_code=401, detail=ErrorModel(msg="You are not an admin."))
         else:
-            result = execute_query(sql, ((account.account_uuid,) + sql_set_values))
+            result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
         if result:
             return account_form
         else:
