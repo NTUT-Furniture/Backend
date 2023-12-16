@@ -2,10 +2,13 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 import app.utils.auth as auth
 from app.model.account import CreateAccountForm, UpdateAccountForm, Account, AccountList
-from app.model.general import SuccessModel, ErrorModel
+from app.model.auth import Token
+from app.model.general import ErrorModel
+from app.router.login import login_for_access_token
 from app.utils.db_process import execute_query, dict_to_sql_command, dict_delete_none, get_all_results
 
 router = APIRouter(
@@ -72,7 +75,7 @@ async def get_all_accounts(
 @router.post(
     "/", tags=["create"], responses={
         status.HTTP_201_CREATED: {
-            "model": SuccessModel
+            "model": Token
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": ErrorModel
@@ -97,9 +100,10 @@ async def create_account(
         """
         result = execute_query(sql, ((account_id,) + (tuple(form.values()))))
         if result:
-            return account_form
-        else:
-            raise HTTPException(status_code=400, detail=ErrorModel(msg="Something went wrong."))
+            return await login_for_access_token(
+                form_data=OAuth2PasswordRequestForm(username=form["email"], password=account_form["pwd"])
+            )
+        raise HTTPException(status_code=400, detail=ErrorModel(msg="Something went wrong."))
     except ValueError as e:
         raise HTTPException(status_code=422, detail=ErrorModel(msg=str(e)))
 
