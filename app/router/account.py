@@ -3,12 +3,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
 
-from model.account import CreateAccountForm, UpdateAccountForm, Account
-from model.general import SuccessModel
-
-import utils.auth as auth
-
-from utils.db_process import execute_query, dict_to_sql_command, dict_delete_none
+import app.utils.auth as auth
+from app.model.account import CreateAccountForm, UpdateAccountForm, Account
+from app.model.general import SuccessModel
+from app.utils.db_process import execute_query, dict_to_sql_command, dict_delete_none
 
 router = APIRouter(
     tags=["account"],

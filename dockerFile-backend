@@ -1,0 +1,36 @@
+#FROM python:3.10.11-slim-buster
+#
+#RUN mkdir /usr/src/app/
+#COPY . /usr/src/app/
+#WORKDIR /usr/src/app/
+#
+#RUN pip install -r requirements.txt
+#
+##EXPOSE 8000
+#
+#CMD ["python","main.py"]
+
+#
+FROM python:3.10.11-slim-buster
+
+WORKDIR /code
+
+COPY ./requirements.txt /code/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+COPY app /code/app
+
+ENV DB_HOST="mysql"
+ENV DB_USER="backend"
+ENV DB_PASSWORD="backend"
+ENV DB_DATABASE="NFT"
+ENV DB_PORT="3306"
+ENV HOST="0.0.0.0"
+ENV PORT="8000"
+ENV WORKERS="4"
+ENV ALGORITHM="HS256"
+ENV ACCESS_TOKEN_EXPIRE_MINUTES="30"
+ENV SECRET_KEY="b97a1bb26f8d37c3964b56b63b02463675c0d5e39ec149bfcbb6299a615d2b0a"
+
+CMD ["sh", "-c", "uvicorn app.server:app --host $HOST --port $PORT --workers $WORKERS"]

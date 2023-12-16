@@ -1,10 +1,9 @@
-from pydantic import BaseModel
-
 from typing import List
 
-from model.general import SuccessModel
+from pydantic import BaseModel
 
-from utils.as_form import as_form
+from app.model.general import SuccessModel
+from app.utils.as_form import as_form
 
 class Coupon(BaseModel):
     shop_uuid: str

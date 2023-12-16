@@ -4,13 +4,13 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 
-from model.account import Account
-from model.general import SuccessModel, ErrorModel
-from model.shop import (
+from app.model.account import Account
+from app.model.general import SuccessModel, ErrorModel
+from app.model.shop import (
     ReturnShop, CreateShopForm, ReturnCreateShop, UpdateShopForm, Shop,
 )
-from utils import auth
-from utils.db_process import (
+from app.utils import auth
+from app.utils.db_process import (
     get_all_results, execute_query, dict_to_sql_command, dict_delete_none, if_exists_in_db,
 )
 
