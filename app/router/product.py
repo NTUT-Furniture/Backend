@@ -21,9 +21,6 @@ router = APIRouter(
     "/", tags=["get"], responses={
         status.HTTP_200_OK: {
             "model": ReturnProduct
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorModel
         }
     }
 )
@@ -39,7 +36,7 @@ async def get_product(
             product = result[0]
             return ReturnProduct(data=[Product(**product)])
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Get product fail.")
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -72,7 +69,7 @@ async def create_product(
         if result:
             return SuccessModel(data=product_id)
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Create product fail.")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -103,6 +100,6 @@ async def update_product(
         if result:
             return SuccessModel(msg="success")
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Update product fail.")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))

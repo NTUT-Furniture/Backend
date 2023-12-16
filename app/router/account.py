@@ -49,7 +49,7 @@ async def create_account(
         if result:
             return SuccessModel(data=account_id)
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Create account fail.")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -82,6 +82,6 @@ async def update_account(
         if result:
             return SuccessModel(msg="success")
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Update account fail.")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))

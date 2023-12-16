@@ -48,9 +48,6 @@ async def get_shop(account_uuid: str):
     responses={
         status.HTTP_200_OK: {
             "model": ReturnCreateShop
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorModel
         }
     }
 )
@@ -69,7 +66,7 @@ async def create_shop(
         if result:
             return SuccessModel(data=shop_id)
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Create shop fail.")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -95,6 +92,6 @@ async def update_shop(
         if result:
             return SuccessModel(msg="success")
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(status_code=400, detail="Update shop fail.")
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))
