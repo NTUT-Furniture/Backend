@@ -41,13 +41,22 @@ def authenticate_user(email: str, password: str) -> TokenData | None:
         SELECT 
             email,
             account_uuid,
-            pwd
+            pwd,
+            role,
+            is_active
         From Account
         WHERE email = %s;
     """
     result = db_process.get_all_results(script, (email,))
     if result:
         if verify_password(password, result[0]["pwd"]):
+            if not result[0]["is_active"]:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Inactive user"
+                )
+            if result[0]["role"] == "1":
+                return TokenData(uuid=result[0]["account_uuid"], role="admin")
             return TokenData(uuid=result[0]["account_uuid"])
     return None
 
