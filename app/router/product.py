@@ -7,7 +7,9 @@ from fastapi.responses import JSONResponse
 
 from app.model.account import Account
 from app.model.general import SuccessModel, ErrorModel
-from app.model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm
+from app.model.product import (
+    ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm, Product
+)
 from app.utils import auth
 from app.utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
@@ -34,15 +36,8 @@ async def get_product(
         """
         result = get_all_results(sql, (shop_uuid,))
         if result:
-            return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content=jsonable_encoder(
-                    {
-                        "msg": "Success",
-                        "data": result
-                    }
-                )
-            )
+            product = result[0]
+            return ReturnProduct(data=[Product(**product)])
         else:
             raise HTTPException(status_code=400, detail="Something went wrong.")
     except ValueError as e:
@@ -65,14 +60,7 @@ async def create_product(
     try:
         shop_uuid = product_form.shop_uuid
         if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content=jsonable_encoder(
-                    {
-                        "msg": f"Account {account.account_uuid} does not own shop {shop_uuid}"
-                    }
-                )
-            )
+            raise HTTPException(status_code=400, detail=f"Account {account.account_uuid} does not own shop {shop_uuid}")
 
         product_form = product_form.model_dump()
         product_id = str(uuid.uuid4())
