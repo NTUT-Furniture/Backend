@@ -143,7 +143,7 @@ async def update_account(
         sql_set_text, sql_set_values = dict_to_sql_command(form)
 
         sql = f"""
-            UPDATE `Account` SET {sql_set_text},  update_time = CURRENT_TIMESTAMP
+            UPDATE `Account` SET {sql_set_text}
             WHERE account_uuid = %s;
         """
         if account_uuid:
