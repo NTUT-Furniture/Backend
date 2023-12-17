@@ -32,9 +32,9 @@ async def get_subscription(
             subscription = result[0]
             return ReturnSubscription(data=[Subscription(**subscription)])
         else:
-            raise HTTPException(status_code=400, detail="Get subscription fail.")
+            raise HTTPException(status_code=404, detail="Subscription not found.")
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
 
 @router.post(
     "/", tags=["create"], responses={

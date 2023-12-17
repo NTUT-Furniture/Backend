@@ -34,9 +34,9 @@ async def get_product(
             product = result[0]
             return ReturnProduct(data=[Product(**product)])
         else:
-            raise HTTPException(status_code=400, detail="Get product fail.")
+            raise HTTPException(status_code=404, detail="Product not found.")
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=422, detail=str(e))
 
 @router.post(
     "/", tags=["create"], responses={
