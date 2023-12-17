@@ -6,3 +6,4 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     uuid: str | None = None
+    role: str = "user"  # value: user, admin
