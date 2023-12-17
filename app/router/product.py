@@ -2,8 +2,6 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
 from app.model.account import Account
 from app.model.general import SuccessModel, ErrorModel

@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 
 from app.model.general import SuccessModel, ErrorModel
 from app.model.subscription import (
