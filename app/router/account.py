@@ -37,7 +37,9 @@ async def get_account(
         status.HTTP_200_OK: {
             "model": AccountList
         },
-        status.HTTP_401_UNAUTHORIZED: {
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ErrorModel
+        }, status.HTTP_403_FORBIDDEN: {
             "model": ErrorModel
         },
     },
@@ -72,13 +74,13 @@ async def get_all_accounts(
             return AccountList(accounts=[Account(**account) for account in result])
         else:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorModel(msg="Something wrong happened.")
             )
     else:
         raise HTTPException(
-            status_code=401,
-            detail=ErrorModel(msg="You are not an admin")
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=ErrorModel(msg="Permission denied.")
         )
 
 @router.post(
@@ -113,12 +115,12 @@ async def create_account(
                 form_data=OAuth2PasswordRequestForm(username=form["email"], password=account_form["pwd"])
             )
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorModel(msg="Something went wrong.")
         )
     except ValueError as e:
         raise HTTPException(
-            status_code=422,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=ErrorModel(msg=str(e))
         )
 
@@ -130,7 +132,7 @@ async def create_account(
         status.HTTP_200_OK: {
             "model": UpdateAccountForm
         },
-        status.HTTP_401_UNAUTHORIZED: {
+        status.HTTP_403_FORBIDDEN: {
             "model": ErrorModel
         },
         status.HTTP_400_BAD_REQUEST: {
@@ -166,8 +168,8 @@ async def update_account(
                 result = execute_query(sql, (sql_set_values + (account_uuid,)))  # TODO: catch errors in db proces
             else:
                 raise HTTPException(
-                    status_code=401,
-                    detail=ErrorModel(msg="You are not an admin.")
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=ErrorModel(msg="Permission denied.")
                 )
         else:
             result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
@@ -175,11 +177,11 @@ async def update_account(
             return account_form
         else:
             raise HTTPException(
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail=ErrorModel(msg="Something went wrong.")
             )
     except ValueError as e:
         raise HTTPException(
-            status_code=422,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=ErrorModel(msg=str(e))
         )
