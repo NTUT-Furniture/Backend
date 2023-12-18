@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 class SuccessModel(BaseModel):
-    msg: str = "Success"
+    msg: str | None = None
 
 class ErrorModel(BaseModel):
-    msg: str = "Fail"
+    msg: str | None = None
