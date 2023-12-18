@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from app.model.account import Account
 from app.model.general import ErrorModel
 from app.model.shop import (
-    CreateShopForm, UpdateShopForm, Shop,
+    CreateShopForm, UpdateShopForm, Shop, ShopList,
 )
 from app.utils import auth
 from app.utils.db_process import (
@@ -112,4 +112,36 @@ async def update_shop(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
         content=ErrorModel(msg=f"Something went wrong")
+    )
+
+@router.get(
+    path="/all",
+    tags=["get"],
+    description="Get all shops. Admins only.",
+    responses={
+        status.HTTP_200_OK: {
+            "model": ShopList
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def get_all_shops(
+        account: Annotated[Account, Depends(auth.get_current_active_user)]
+):
+    if account.role != 1:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=ErrorModel(msg=f"Permission denied")
+        )
+    sql = "SELECT * FROM `Shop`;"
+    result = get_all_results(sql)
+    if result:
+        for shop in result:
+            shop["update_time"] = str(shop["update_time"])
+        return ShopList(shops=[Shop(**shop) for shop in result])
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=ErrorModel(msg=f"No shops found")
     )
