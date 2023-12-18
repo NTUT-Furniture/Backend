@@ -1,8 +1,6 @@
+from typing import List
+
 from pydantic import BaseModel
-
-from typing import Optional, List
-
-from app.model.general import SuccessModel
 
 from app.utils.as_form import as_form
 
@@ -10,26 +8,18 @@ class Shop(BaseModel):
     shop_uuid: str
     account_uuid: str
     name: str
-    description: str
-    image_url: str
+    description: str | None = None
+    is_active: int | None = None
     update_time: str
 
-class ReturnShop(SuccessModel):
+class ShopList(BaseModel):
     data: List[Shop]
 
 @as_form
 class CreateShopForm(BaseModel):
-    account_uuid: str
     name: str
-    image_url: str
-    description: Optional[str]
-
-class ReturnCreateShop(SuccessModel):
-    data: str
+    description: str | None = None
 
 @as_form
-class UpdateShopForm(BaseModel):
-    shop_uuid: str
-    name: Optional[str]
-    image_url: Optional[str]
-    description: Optional[str]
+class UpdateShopForm(CreateShopForm):
+    is_active: int | None = None
