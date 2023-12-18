@@ -11,8 +11,8 @@ class Product(BaseModel):
     name: str
     stock: int
     price: int
-    tags: str
-    description: str
+    tags: Optional[str] = None
+    description: Optional[str] = None
     update_time: str
 
 class ReturnProduct(SuccessModel):

@@ -10,7 +10,7 @@ class Shop(BaseModel):
     shop_uuid: str
     account_uuid: str
     name: str
-    description: str
+    description: Optional[str] = None
     update_time: str
 
 class ReturnShop(SuccessModel):
