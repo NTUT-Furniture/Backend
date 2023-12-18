@@ -26,8 +26,22 @@ class CreateProductForm(BaseModel):
     description: str | None = None
     is_active: int | None = None
 
+class CreateProductResponse(BaseModel):
+    product_uuid: str
+    shop_uuid: str
+    name: str
+    stock: int
+    price: int
+    tags: str | None = None
+    description: str | None = None
+    is_active: int | None = None
+
 @as_form
-class UpdateProductForm(CreateProductForm):
+class UpdateProductForm(BaseModel):
+    product_uuid: str
     name: str | None = None
     stock: int | None = None
     price: int | None = None
+    tags: str | None = None
+    description: str | None = None
+    is_active: int | None = None
