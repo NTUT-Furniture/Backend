@@ -13,7 +13,7 @@ INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cd0d0-8916-11
 INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cd0d0-8916-11ee-bb92-42010aae0002', 'f150acb3-8998-11ee-bb92-42010aae0002');
 INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cdb41-8916-11ee-bb92-42010aae0002', 'f150af72-8998-11ee-bb92-42010aae0002');
 INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cdb41-8916-11ee-bb92-42010aae0002', 'f150b096-8998-11ee-bb92-42010aae0002');
-INSERT INTO NFT.Subscriptio1n (account_uuid, shop_uuid) VALUES ('831cdd39-8916-11ee-bb92-42010aae0002', 'f150b186-8998-11ee-bb92-42010aae0002');
+INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cdd39-8916-11ee-bb92-42010aae0002', 'f150b186-8998-11ee-bb92-42010aae0002');
 INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cdd39-8916-11ee-bb92-42010aae0002', 'f150b368-8998-11ee-bb92-42010aae0002');
 INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cde2e-8916-11ee-bb92-42010aae0002', 'f150b459-8998-11ee-bb92-42010aae0002');
 INSERT INTO NFT.Subscription (account_uuid, shop_uuid) VALUES ('831cde2e-8916-11ee-bb92-42010aae0002', 'f150b531-8998-11ee-bb92-42010aae0002');
