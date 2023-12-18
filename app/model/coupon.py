@@ -2,7 +2,6 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.model.general import SuccessModel
 from app.utils.as_form import as_form
 
 class Coupon(BaseModel):
@@ -12,7 +11,7 @@ class Coupon(BaseModel):
     expire_time: str
     update_time: str
 
-class ReturnCoupon(SuccessModel):
+class CouponList(BaseModel):
     data: List[Coupon]
 
 @as_form
@@ -21,6 +20,3 @@ class CreateCouponForm(BaseModel):
     discount: int
     coupon_code: str
     expire_time: str
-
-class ReturnCreateCoupon(SuccessModel):
-    data: str
