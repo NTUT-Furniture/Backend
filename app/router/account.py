@@ -165,7 +165,7 @@ async def update_account(
         """
         if account_uuid:
             if account.role == 1:
-                result = execute_query(sql, (sql_set_values + (account_uuid,)))  # TODO: catch errors in db proces
+                result = execute_query(sql, (sql_set_values + (account_uuid,)))
             else:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
