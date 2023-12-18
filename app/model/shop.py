@@ -26,7 +26,6 @@ class CreateShopResponse(CreateShopForm):
 
 @as_form
 class UpdateShopForm(CreateShopForm):
-    shop_uuid: str | None = None
     name: str | None = None
     description: str | None = None
     is_active: int | None = None
