@@ -40,7 +40,7 @@ async def get_shop(account_uuid: str):
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=ErrorModel(msg=f"Shop with account_uuid {account_uuid} not found")
+        detail=ErrorModel(msg=f"Shop with account_uuid {account_uuid} not found").model_dump()
     )
 
 @router.post(
@@ -65,7 +65,7 @@ async def create_shop(
     if await if_exists_in_db("Shop", "account_uuid", account.account_uuid):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorModel(msg=f"Shop with account_uuid {account.account_uuid} already exists")
+            detail=ErrorModel(msg=f"Shop with account_uuid {account.account_uuid} already exists").model_dump()
         )
     shop_id = str(uuid.uuid4())
     shop_form = shop_form.model_dump()
@@ -80,7 +80,7 @@ async def create_shop(
         )
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=ErrorModel(msg=f"Something went wrong")
+        detail=ErrorModel(msg=f"Something went wrong").model_dump()
     )
 
 @router.put(
@@ -113,7 +113,7 @@ async def update_shop(
         else:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=ErrorModel(msg=f"Permission denied")
+                detail=ErrorModel(msg=f"Permission denied").model_dump()
             )
     else:
         sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
@@ -147,7 +147,7 @@ async def get_all_shops(
     if account.role != 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=ErrorModel(msg=f"Permission denied")
+            detail=ErrorModel(msg=f"Permission denied").model_dump()
         )
     sql = "SELECT * FROM `Shop`;"
     result = get_all_results(sql)
@@ -157,5 +157,5 @@ async def get_all_shops(
         return ShopList(shops=[Shop(**shop) for shop in result])
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=ErrorModel(msg=f"No shops found")
+        detail=ErrorModel(msg=f"No shops found").model_dump()
     )
