@@ -29,9 +29,9 @@ router = APIRouter(
         }
     }
 )
-async def get_shop(account_uuid: str):
-    sql = "SELECT * FROM `Shop` WHERE account_uuid = %s;"
-    result = get_all_results(sql, (account_uuid,))
+async def get_shop(shop_uuid: str):
+    sql = "SELECT * FROM `Shop` WHERE shop_uuid = %s AND is_active = 1 LIMIT 1;"
+    result = get_all_results(sql, (shop_uuid,))
 
     if result:
         shop = result[0]
@@ -40,7 +40,7 @@ async def get_shop(account_uuid: str):
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=ErrorModel(msg=f"Shop with account_uuid {account_uuid} not found").model_dump()
+        detail=ErrorModel(msg=f"Shop with shop_uuid {shop_uuid} not found").model_dump()
     )
 
 @router.post(
