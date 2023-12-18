@@ -24,6 +24,9 @@ router = APIRouter(
         status.HTTP_200_OK: {
             "model": Shop
         },
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorModel
+        },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
         }
@@ -60,8 +63,18 @@ async def get_shop(shop_uuid: str):
 )
 async def create_shop(
         account: Annotated[Account, Depends(auth.get_current_active_user)],
-        shop_form: CreateShopForm = Depends(CreateShopForm.as_form)
+        shop_form: CreateShopForm = Depends(CreateShopForm.as_form),
+        account_uuid: str | None = None
 ):
+    if account_uuid:
+        if account.role == 1:
+            account.account_uuid = account_uuid
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=ErrorModel(msg=f"Permission denied").model_dump()
+            )
+
     if await if_exists_in_db("Shop", "account_uuid", account.account_uuid):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
