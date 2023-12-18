@@ -10,3 +10,4 @@ python-jose[cryptography]~=3.3.0
 passlib~=1.7.4
 pytz~=2023.3.post1
 bcrypt~=3.2.0
+email-validator

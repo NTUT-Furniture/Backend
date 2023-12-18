@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from app.utils.as_form import as_form
 
 class Account(BaseModel):
     account_uuid: str
     name: str
-    email: str
+    email: EmailStr
     phone: str | None = None
     birthday: str | None = None
     address: str | None = None
@@ -19,7 +19,7 @@ class AccountList(BaseModel):
 @as_form
 class CreateAccountForm(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     pwd: str
     phone: str | None = None
     credit_card: str | None = None
