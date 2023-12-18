@@ -1,13 +1,13 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.model.account import Account
-from app.model.general import SuccessModel, ErrorModel
-from app.model.product import ReturnProduct, CreateProductForm, ReturnCreateProduct, UpdateProductForm
+from app.model.general import ErrorModel
+from app.model.product import (CreateProductForm, Product, CreateProductResponse,
+                               UpdateProductForm,
+                               )
 from app.utils import auth
 from app.utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
 
@@ -18,7 +18,7 @@ router = APIRouter(
 @router.get(
     "/", tags=["get"], responses={
         status.HTTP_200_OK: {
-            "model": ReturnProduct
+            "model": Product
         },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
@@ -33,28 +33,16 @@ async def get_product(
     """
     result = get_all_results(sql, (shop_uuid,))
     if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success",
-                    "data": result
-                }
-            )
-        )
-    return JSONResponse(
+        return Product(**result[0])
+    raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
+        detail=ErrorModel(msg="Product not found")
     )
 
 @router.post(
     "/", tags=["create"], responses={
         status.HTTP_200_OK: {
-            "model": ReturnCreateProduct
+            "model": CreateProductResponse
         },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
@@ -67,15 +55,12 @@ async def create_product(
 ):
     shop_uuid = product_form.shop_uuid
     if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder(
-                {
-                    "msg": f"Account {account.account_uuid} does not own shop {shop_uuid}"
-                }
+            detail=ErrorModel(
+                msg=f"Account {account.account_uuid} does not own shop {shop_uuid}"
             )
         )
-
     product_form = product_form.model_dump()
     product_id = str(uuid.uuid4())
     sql = """
@@ -84,28 +69,18 @@ async def create_product(
     """
     result = execute_query(sql, (str(product_id),) + tuple(product_form.values()))
     if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "msg": "Success",
-                "data": product_id
-            }
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
+        return CreateProductForm(shop_uuid=shop_uuid, product_uuid=product_id, **product_form)
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=ErrorModel(msg="Something wrong happened.")
     )
 
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
-            "model": SuccessModel
+            "model": UpdateProductForm
         },
-        status.HTTP_404_NOT_FOUND: {
+        status.HTTP_400_BAD_REQUEST: {
             "model": ErrorModel
         }
     }
@@ -117,12 +92,10 @@ async def update_product(
     product_uuid = product_form.product_uuid
     shop_uuid = product_form.shop_uuid
     if not await auth.if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
-        return JSONResponse(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content=jsonable_encoder(
-                {
-                    "msg": f"Account {account.account_uuid} does not own product {product_uuid}"
-                }
+            detail=ErrorModel(
+                msg=f"Account {account.account_uuid} does not own product {product_uuid}"
             )
         )
     product_form = product_form.model_dump()
@@ -134,19 +107,8 @@ async def update_product(
     """
     result = execute_query(sql, (sql_set_values + (product_form["product_uuid"],)))
     if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=jsonable_encoder(
-                {
-                    "msg": "Success"
-                }
-            )
-        )
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content=jsonable_encoder(
-            {
-                "msg": "Fail"
-            }
-        )
+        return UpdateProductForm(**product_form)
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=ErrorModel(msg="Something wrong happened.")
     )
