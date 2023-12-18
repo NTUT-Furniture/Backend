@@ -27,10 +27,6 @@ async def get_account(
             Account,
             Depends(auth.get_current_active_user)]
 ):
-    if account.role != 1:
-        account.is_active = None
-        account.role = None
-        account.update_time = None
     return account
 
 @router.get(
