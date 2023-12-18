@@ -13,7 +13,7 @@ class Shop(BaseModel):
     update_time: str
 
 class ShopList(BaseModel):
-    data: List[Shop]
+    shops: List[Shop]
 
 @as_form
 class CreateShopForm(BaseModel):

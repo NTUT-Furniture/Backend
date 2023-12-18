@@ -12,7 +12,7 @@ class Coupon(BaseModel):
     update_time: str
 
 class CouponList(BaseModel):
-    data: List[Coupon]
+    coupons: List[Coupon]
 
 @as_form
 class CreateCouponForm(BaseModel):
