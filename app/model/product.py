@@ -10,7 +10,6 @@ class Product(BaseModel):
     shop_uuid: str
     name: str
     stock: int
-    image_url: str
     price: int
     tags: str
     description: str
@@ -24,7 +23,6 @@ class CreateProductForm(BaseModel):
     shop_uuid: str
     name: str
     stock: int
-    image_url: str
     price: int
     tags: Optional[str] = None
     description: Optional[str] = None
@@ -38,7 +36,6 @@ class UpdateProductForm(BaseModel):
     shop_uuid: str
     name: Optional[str]
     stock: Optional[int]
-    image_url: Optional[str]
     price: Optional[int]
     tags: Optional[str]
     description: Optional[str]

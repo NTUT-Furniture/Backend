@@ -61,9 +61,9 @@ async def create_product(
         product_id = str(uuid.uuid4())
         sql = """
             INSERT INTO `Product`
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT);
+            VALUES (%s, %s, %s, %s, %s, %s, %s, DEFAULT, DEFAULT);
         """
-        result = execute_query(sql, (str(product_id),) + tuple(product_form.values()))
+        result = execute_query(sql, (str(product_id), shop_uuid,) + tuple(product_form.values()))
         if result:
             return SuccessModel(data=product_id)
         else:
