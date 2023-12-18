@@ -59,7 +59,7 @@ async def create_shop(
             raise HTTPException(status_code=400, detail=f"The account {account.account_uuid} already owned a shop")
         shop_id = str(uuid.uuid4())
         shop_form = shop_form.model_dump()
-        sql = f"INSERT INTO `Shop` VALUES (%s, %s,  %s, %s, %s, DEFAULT);"
+        sql = f"INSERT INTO `Shop` VALUES (%s, %s, %s, %s, DEFAULT, DEFAULT);"
 
         result = execute_query(sql, (shop_id, account.account_uuid) + tuple(shop_form.values()))
         if result:

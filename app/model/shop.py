@@ -11,7 +11,6 @@ class Shop(BaseModel):
     account_uuid: str
     name: str
     description: str
-    image_url: str
     update_time: str
 
 class ReturnShop(SuccessModel):
@@ -21,7 +20,6 @@ class ReturnShop(SuccessModel):
 class CreateShopForm(BaseModel):
     account_uuid: str
     name: str
-    image_url: str
     description: Optional[str]
 
 class ReturnCreateShop(SuccessModel):
@@ -31,5 +29,4 @@ class ReturnCreateShop(SuccessModel):
 class UpdateShopForm(BaseModel):
     shop_uuid: str
     name: Optional[str]
-    image_url: Optional[str]
     description: Optional[str]
