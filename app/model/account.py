@@ -28,5 +28,12 @@ class CreateAccountForm(BaseModel):
 
 @as_form
 class UpdateAccountForm(CreateAccountForm):
+    name: str | None = None
+    email: EmailStr | None = None
+    pwd: str | None = None
+    phone: str | None = None
+    credit_card: str | None = None
+    birthday: str | None = None
+    address: str | None = None
     is_active: int | None = None
     role: int | None = None
