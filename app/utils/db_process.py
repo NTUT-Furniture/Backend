@@ -42,11 +42,9 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
     except mysql.connector.Error as e:
         if not fetch and connection is not None:
             connection.rollback()
-        # TODO: logger
-        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Some error occurred when executing sql command"
+            detail=f"Some error occurred when executing sql command:{e}"  # TODO: Remove sql error on release
         )
 
     finally:
