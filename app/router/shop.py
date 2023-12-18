@@ -90,6 +90,9 @@ async def create_shop(
         status.HTTP_200_OK: {
             "model": UpdateShopForm
         },
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorModel
+        },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
         }
@@ -97,13 +100,24 @@ async def create_shop(
 )
 async def update_shop(
         account: Annotated[Account, Depends(auth.get_current_active_user)],
-        shop_form: UpdateShopForm = Depends(UpdateShopForm.as_form)
+        shop_form: UpdateShopForm = Depends(UpdateShopForm.as_form),
+        shop_uuid: str | None = None
 ):
     shop_form = dict_delete_none(shop_form.model_dump())
 
     sql_set_text, sql_set_values = dict_to_sql_command(shop_form)
-    sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
-    result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
+    if shop_uuid:
+        if account.role == 1:
+            sql = f"UPDATE `Shop` SET {sql_set_text} WHERE shop_uuid = %s;"
+            result = execute_query(sql, (sql_set_values + (shop_uuid,)))
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=ErrorModel(msg=f"Permission denied")
+            )
+    else:
+        sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
+        result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
     if result:
         return JSONResponse(
             status_code=status.HTTP_200_OK,
