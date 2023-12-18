@@ -27,10 +27,17 @@ async def get_account(
             Account,
             Depends(auth.get_current_active_user)]
 ):
+    if account.role != 1:
+        account.is_active = None
+        account.role = None
+        account.update_time = None
     return account
 
 @router.get(
-    path="/all", tags=["get"], responses={
+    path="/all",
+    description="Get a list of all accounts.\n This is an admin-only endpoint.",
+    tags=["get"],
+    responses={
         status.HTTP_200_OK: {
             "model": AccountList
         },
@@ -68,9 +75,15 @@ async def get_all_accounts(
 
             return AccountList(accounts=[Account(**account) for account in result])
         else:
-            raise HTTPException(status_code=400, detail="Something went wrong.")
+            raise HTTPException(
+                status_code=400,
+                detail=ErrorModel(msg="Something wrong happened.")
+            )
     else:
-        raise HTTPException(status_code=401, detail="You are not an admin.")
+        raise HTTPException(
+            status_code=401,
+            detail=ErrorModel(msg="You are not an admin")
+        )
 
 @router.post(
     "/", tags=["create"], responses={
@@ -103,14 +116,20 @@ async def create_account(
             return await login_for_access_token(
                 form_data=OAuth2PasswordRequestForm(username=form["email"], password=account_form["pwd"])
             )
-        raise HTTPException(status_code=400, detail=ErrorModel(msg="Something went wrong."))
+        raise HTTPException(
+            status_code=400,
+            detail=ErrorModel(msg="Something went wrong.")
+        )
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=ErrorModel(msg=str(e)))
+        raise HTTPException(
+            status_code=422,
+            detail=ErrorModel(msg=str(e))
+        )
 
 @router.put(
     path="/",
     description="Update current logged in account info. "
-                "If a admin token is provided, they may update other accounts by providing corresponding uuid.",
+                "Admins may update other accounts by providing corresponding uuid.",
     tags=["update"], responses={
         status.HTTP_200_OK: {
             "model": UpdateAccountForm
@@ -148,14 +167,23 @@ async def update_account(
         """
         if account_uuid:
             if account.role == 1:
-                result = execute_query(sql, (sql_set_values + (account_uuid,)))
+                result = execute_query(sql, (sql_set_values + (account_uuid,)))  # TODO: catch errors in db proces
             else:
-                raise HTTPException(status_code=401, detail=ErrorModel(msg="You are not an admin."))
+                raise HTTPException(
+                    status_code=401,
+                    detail=ErrorModel(msg="You are not an admin.")
+                )
         else:
             result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
         if result:
             return account_form
         else:
-            raise HTTPException(status_code=500, detail=ErrorModel(msg="Something went wrong."))
+            raise HTTPException(
+                status_code=400,
+                detail=ErrorModel(msg="Something went wrong.")
+            )
     except ValueError as e:
-        raise HTTPException(status_code=422, detail=ErrorModel(msg=str(e)))
+        raise HTTPException(
+            status_code=422,
+            detail=ErrorModel(msg=str(e))
+        )
