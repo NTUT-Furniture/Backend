@@ -120,18 +120,19 @@ async def update_shop(
     shop_form = dict_delete_none(shop_form.model_dump())
 
     sql_set_text, sql_set_values = dict_to_sql_command(shop_form)
+    sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
+    id = account.account_uuid
     if shop_uuid:
         if account.role == 1:
             sql = f"UPDATE `Shop` SET {sql_set_text} WHERE shop_uuid = %s;"
-            result = execute_query(sql, (sql_set_values + (shop_uuid,)))
+            id = shop_uuid
         else:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Permission denied"
-            )
-    else:
-        sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
-        result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
+            if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Permission denied"
+                )
+    result = execute_query(sql, (sql_set_values + (id,)))
     if result:
         return UpdateShopForm(**shop_form)
     raise HTTPException(
