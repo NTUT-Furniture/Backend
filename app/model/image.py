@@ -2,13 +2,11 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from app.model.general import SuccessModel
-
 class ImageTypeModel(str, Enum):
     avatar = "avatar"
     banner = "banner"
 
-class ImageUploadSuccessModel(SuccessModel):
+class ImageUploadSuccessModel(BaseModel):
     image_uuid: str
     content_type: str
     size: int
