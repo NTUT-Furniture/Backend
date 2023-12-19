@@ -101,7 +101,7 @@ async def if_one_owns_the_other(
 
 async def get_shop_by_account_uuid(account_uuid: str) -> str:
     sql = """
-        SELECT shop_uuid FROM `Shop` WHERE account_uuid = %s;
+        SELECT shop_uuid FROM `Shop` WHERE account_uuid = %s LIMIT 1;
     """
     result = get_all_results(sql, (account_uuid,))
     if result:

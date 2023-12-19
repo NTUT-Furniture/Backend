@@ -45,7 +45,8 @@ def authenticate_user(email: str, password: str) -> TokenData | None:
             role,
             is_active
         From Account
-        WHERE email = %s;
+        WHERE email = %s
+        LIMIT 1;
     """
     result = db_process.get_all_results(script, (email,))
     if result:
