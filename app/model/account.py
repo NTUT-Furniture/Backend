@@ -29,9 +29,8 @@ class CreateAccountForm(BaseModel):
     address: str | None = None
 
 @as_form
-class UpdateAccountForm(CreateAccountForm):
+class UpdateAccountForm(BaseModel):
     name: str | None = None
-    email: EmailStr | None = None
     pwd: str | None = None
     phone: str | None = None
     credit_card: str | None = None
