@@ -17,7 +17,6 @@ class CouponList(BaseModel):
 
 @as_form
 class CreateCouponForm(BaseModel):
-
     discount: int
     coupon_code: str
     expire_time: datetime.date
