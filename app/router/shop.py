@@ -46,6 +46,33 @@ async def get_shop(shop_uuid: str):
         detail=f"Shop with shop_uuid {shop_uuid} not found"
     )
 
+@router.get(
+    path="/mine",
+    tags=["get"],
+    description="Get shop by account_uuid",
+    responses={
+        status.HTTP_200_OK: {
+            "model": Shop
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def get_shop_by_account(
+        account: Annotated[Account, Depends(auth.get_current_active_user)]
+):
+    sql = "SELECT * FROM `Shop` WHERE account_uuid = %s AND is_active = 1 LIMIT 1;"
+    result = get_all_results(sql, (account.account_uuid,))
+    if result:
+        shop = result[0]
+        shop["update_time"] = str(shop["update_time"])
+        return Shop(**shop)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Shop with account_uuid {account.account_uuid} not found"
+    )
+
 @router.post(
     "/",
     tags=["create"],
