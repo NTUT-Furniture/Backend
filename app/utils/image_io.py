@@ -6,7 +6,7 @@ from fastapi import UploadFile, status
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse, FileResponse
 
-from app.model.image import ImageTypeModel
+from app.model.image import ImageTypeEnum
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -20,11 +20,11 @@ def get_directory_path(owner_id: str) -> str:
     path = f"../upload_images/{owner_id}"
     return path
 
-def get_filename(file: UploadFile, image_type: ImageTypeModel) -> str:
+def get_filename(file: UploadFile, image_type: ImageTypeEnum) -> str:
     _, filetype = file.filename.split(".")
     return f"{image_type.value}.{filetype}"
 
-async def save_file(file: Optional[UploadFile], owner_id: str, image_type: ImageTypeModel) -> JSONResponse:
+async def save_file(file: Optional[UploadFile], owner_id: str, image_type: ImageTypeEnum) -> JSONResponse:
     if file.content_type not in ["image/jpeg", "image/png"]:
         return JSONResponse(
             status_code=400,
@@ -60,7 +60,7 @@ async def save_file(file: Optional[UploadFile], owner_id: str, image_type: Image
         )
     )
 
-async def get_file(owner_uuid: str, image_type: ImageTypeModel) -> Union[FileResponse, JSONResponse]:
+async def get_file(owner_uuid: str, image_type: ImageTypeEnum) -> Union[FileResponse, JSONResponse]:
     directory_path = get_directory_path(owner_uuid)
     if not os.path.exists(directory_path):
         return JSONResponse(
