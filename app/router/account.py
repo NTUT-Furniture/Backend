@@ -65,12 +65,6 @@ async def get_all_accounts(
         """
         result: dict = get_all_results(sql)
         if result:
-            # for account in result:
-            # if account["birthday"]:
-            #     account["birthday"] = str(account["birthday"])
-            # if account["update_time"]:
-            #     account["update_time"] = str(account["update_time"])
-            print(result)
             return AccountList(accounts=[Account(**account) for account in result])
         else:
             raise HTTPException(
