@@ -24,7 +24,7 @@ class CreateProductForm(BaseModel):
     price: int
     tags: str | None = None
     description: str | None = None
-    is_active: int | None = None
+    is_active: int | None = 1
 
 class CreateProductResponse(BaseModel):
     product_uuid: str
