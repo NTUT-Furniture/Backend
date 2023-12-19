@@ -36,7 +36,7 @@ async def get_product(
         return Product(**result[0])
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=ErrorModel(msg="Product not found")
+        detail=f"Product not found"
     )
 
 @router.post(
@@ -72,7 +72,7 @@ async def create_product(
         return CreateProductForm(shop_uuid=shop_uuid, product_uuid=product_id, **product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=ErrorModel(msg="Something wrong happened.")
+        detail=f"Something wrong happened."
     )
 
 @router.put(
@@ -110,5 +110,5 @@ async def update_product(
         return UpdateProductForm(**product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=ErrorModel(msg="Something wrong happened.")
+        detail=f"Something wrong happened."
     )
