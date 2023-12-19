@@ -98,3 +98,15 @@ async def if_one_owns_the_other(
     result = get_all_results(sql, (val1, val2))
     assert result[0]["Exists"] in [0, 1]
     return result[0]["Exists"] == 1
+
+async def get_shop_by_account_uuid(account_uuid: str) -> str:
+    sql = """
+        SELECT shop_uuid FROM `Shop` WHERE account_uuid = %s;
+    """
+    result = get_all_results(sql, (account_uuid,))
+    if result:
+        return result[0]["shop_uuid"]
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Shop under account: {account_uuid} is not found"
+    )
