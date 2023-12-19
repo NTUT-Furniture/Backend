@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 from pydantic import BaseModel
@@ -12,7 +13,7 @@ class Product(BaseModel):
     price: int
     tags: str | None = None
     description: str | None = None
-    update_time: str
+    update_time: datetime.date
 
 class ProductList(BaseModel):
     products: List[Product]

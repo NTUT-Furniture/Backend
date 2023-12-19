@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 from pydantic import BaseModel
@@ -10,7 +11,7 @@ class Shop(BaseModel):
     name: str
     description: str | None = None
     is_active: int | None = None
-    update_time: str
+    update_time: datetime.datetime
 
 class ShopList(BaseModel):
     shops: List[Shop]

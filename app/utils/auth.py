@@ -83,7 +83,10 @@ def get_account(uuid: str) -> Account | None:
         if account["birthday"]:
             account["birthday"] = account["birthday"].strftime("%Y-%m-%d")
         if account["update_time"]:
-            account["update_time"] = account["update_time"].strftime("%Y-%m-%d %H:%M:%S")
+            account["update_time"] = datetime(
+                account["update_time"].year, account["update_time"].month,
+                account["update_time"].day, tzinfo=pytz.timezone('Asia/Taipei')
+            )
         return Account(**account)
     return None
 
