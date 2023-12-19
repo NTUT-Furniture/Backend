@@ -9,7 +9,9 @@ from app.model.product import (CreateProductForm, Product, CreateProductResponse
                                UpdateProductForm,
                                )
 from app.utils import auth
-from app.utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
+from app.utils.db_process import (get_all_results, execute_query, dict_to_sql_command, dict_delete_none,
+                                  get_shop_by_account_uuid,
+                                  )
 
 router = APIRouter(
     tags=["product"]
@@ -53,23 +55,17 @@ async def create_product(
         account: Annotated[Account, Depends(auth.get_current_active_user)],
         product_form: CreateProductForm = Depends(CreateProductForm.as_form)
 ):
-    shop_uuid = product_form.shop_uuid
-    if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorModel(
-                msg=f"Account {account.account_uuid} does not own shop {shop_uuid}"
-            )
-        )
+    shop_uuid = await get_shop_by_account_uuid(account.account_uuid)
     product_form = product_form.model_dump()
+    product_form["is_active"] = product_form["is_active"] if product_form["is_active"] is not None else 1
     product_id = str(uuid.uuid4())
     sql = """
         INSERT INTO `Product`
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, DEFAULT);
     """
-    result = execute_query(sql, (str(product_id),) + tuple(product_form.values()))
+    result = execute_query(sql, (product_id, shop_uuid, *product_form.values()))
     if result:
-        return CreateProductForm(shop_uuid=shop_uuid, product_uuid=product_id, **product_form)
+        return CreateProductResponse(shop_uuid=shop_uuid, product_uuid=product_id, **product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail=f"Something wrong happened."
