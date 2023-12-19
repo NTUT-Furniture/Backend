@@ -75,12 +75,12 @@ async def get_all_accounts(
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ErrorModel(msg="Something wrong happened.")
+                detail=f"Something wrong happened."
             )
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=ErrorModel(msg="Permission denied.").model_dump()
+            detail=f"Permission denied."
         )
 
 @router.post(
@@ -116,7 +116,7 @@ async def create_account(
             )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorModel(msg="Something went wrong.").model_dump()
+            detail=f"Something went wrong."
         )
     except ValueError as e:
         raise HTTPException(
@@ -169,7 +169,7 @@ async def update_account(
             else:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=ErrorModel(msg="Permission denied.").model_dump()
+                    detail=f"Permission denied."
                 )
         else:
             result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
@@ -178,7 +178,7 @@ async def update_account(
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ErrorModel(msg="Something went wrong.").model_dump()
+                detail=f"Something went wrong."
             )
     except ValueError as e:
         raise HTTPException(
