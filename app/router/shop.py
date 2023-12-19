@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.responses import JSONResponse
 
 from app.model.account import Account
 from app.model.general import ErrorModel
@@ -134,13 +133,10 @@ async def update_shop(
         sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
         result = execute_query(sql, (sql_set_values + (account.account_uuid,)))
     if result:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=UpdateShopForm(**shop_form)
-        )
-    return JSONResponse(
+        return UpdateShopForm(**shop_form)
+    raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content=ErrorModel(msg=f"Something went wrong")
+        detail=f"Something went wrong"
     )
 
 @router.get(
