@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -82,13 +83,14 @@ async def create_shop(
         )
     shop_id = str(uuid.uuid4())
     shop_form = shop_form.model_dump()
-    sql = f"INSERT INTO `Shop` VALUES (%s, %s,  %s, %s, %s, DEFAULT);"
+    sql = f"INSERT INTO `Shop` VALUES (%s, %s,  %s, %s, DEFAULT, DEFAULT);"
 
     result = execute_query(sql, (shop_id, account.account_uuid) + tuple(shop_form.values()))
     if result:
         return Shop(
             shop_uuid=shop_id,
             account_uuid=account.account_uuid,
+            update_time=str(datetime.now()),
             **shop_form
         )
     raise HTTPException(
