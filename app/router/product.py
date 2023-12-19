@@ -114,7 +114,6 @@ async def update_product(
 
 @router.get(
     path="/all",
-    description="Get all products in the database.",
     tags=["get"],
     responses={
         status.HTTP_200_OK: {
@@ -129,6 +128,50 @@ async def get_all_products(
         product_form: GetProductForm = Depends(GetProductForm.as_form),
         order: OrderEnum = OrderEnum.random
 ):
+    """
+    Get all products with filter and order.
+    Query parameters' default values and meanings:
+    - order:
+        - default: random
+        - available: product_uuid, shop_uuid, name, stock, price, tags, description, is_active, update_time, random
+        - meaning: order by the column
+    - shop_uuid:
+        - default: None
+        - available: any shop_uuid
+        - meaning: filter by shop_uuid
+    - is_active:
+        - default: 1
+        - available: 0, 1
+        - meaning: filter by is_active
+    - from_price:
+        - default: 0
+        - available: any unsigned  integer
+        - meaning: filter by price >= from_price
+    - to_price:
+        - default: 4294967295
+        - available: any unsigned integer
+        - meaning: filter by price <= to_price
+    - from_stock:
+        - default: 0
+        - available: any unsigned integer
+        - meaning: filter by stock >= from_stock
+    - to_stock:
+        - default: 4294967295
+        - available: any unsigned integer
+        - meaning: filter by stock <= to_stock
+    - tags:
+        - default: None
+        - available: any string
+        - meaning: filter by tags
+    - start:
+        - default: 0
+        - available: any unsigned integer
+        - meaning: start from the start-th product
+    - limit:
+        - default: 10
+        - available: any unsigned integer
+        - meaning: limit the number of products
+    """
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
     product_form = GetProductForm(**product_form)
