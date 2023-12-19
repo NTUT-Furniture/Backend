@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.model.account import Account
 from app.model.general import ErrorModel
 from app.model.product import (CreateProductForm, Product, CreateProductResponse,
-                               UpdateProductForm,
+                               UpdateProductForm, ProductList,
                                )
 from app.utils import auth
 from app.utils.db_process import (get_all_results, execute_query, dict_to_sql_command, dict_delete_none,
@@ -18,7 +18,9 @@ router = APIRouter(
 )
 
 @router.get(
-    "/", tags=["get"], responses={
+    path="/",
+    tags=["get"],
+    responses={
         status.HTTP_200_OK: {
             "model": Product
         },
@@ -28,17 +30,17 @@ router = APIRouter(
     }
 )
 async def get_product(
-        shop_uuid: str
+        shop_uuid: str,
 ):
     sql = """
         SELECT * FROM `Product` WHERE shop_uuid = %s;
     """
     result = get_all_results(sql, (shop_uuid,))
     if result:
-        return Product(**result[0])
+        return ProductList(products=result)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Product not found"
+        detail=f"There is no product for shop_uuid {shop_uuid}"
     )
 
 @router.post(
