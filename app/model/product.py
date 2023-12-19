@@ -1,4 +1,5 @@
 import datetime
+from enum import Enum
 from typing import List
 
 from pydantic import BaseModel
@@ -13,7 +14,7 @@ class Product(BaseModel):
     price: int
     tags: str | None = None
     description: str | None = None
-    update_time: datetime.date
+    update_time: datetime.datetime
 
 class ProductList(BaseModel):
     products: List[Product]
@@ -46,3 +47,27 @@ class UpdateProductForm(BaseModel):
     tags: str | None = None
     description: str | None = None
     is_active: int | None = None
+
+class OrderEnum(str, Enum):
+    product_uuid = "product_uuid"
+    shop_uuid = "shop_uuid"
+    name = "name"
+    stock = "stock"
+    price = "price"
+    tags = "tags"
+    description = "description"
+    is_active = "is_active"
+    update_time = "update_time"
+    random = "RAND()"
+
+@as_form
+class GetProductForm(BaseModel):
+    shop_uuid: str | None = None
+    is_active: int | None = 1
+    from_price: int | None = 0
+    to_price: int | None = 4294967295
+    from_stock: int | None = 0
+    to_stock: int | None = 4294967295
+    tags: str | None = None
+    start: int | None = 0
+    limit: int | None = 10

@@ -6,12 +6,13 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.model.account import Account
 from app.model.general import ErrorModel
 from app.model.product import (CreateProductForm, Product, CreateProductResponse,
-                               UpdateProductForm, ProductList,
+                               UpdateProductForm, ProductList, GetProductForm, OrderEnum,
                                )
 from app.utils import auth
 from app.utils.db_process import (get_all_results, execute_query, dict_to_sql_command, dict_delete_none,
                                   get_shop_by_account_uuid,
                                   )
+from app.utils.product_getter import *
 
 router = APIRouter(
     tags=["product"]
@@ -109,4 +110,55 @@ async def update_product(
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail=f"Something wrong happened."
+    )
+
+@router.get(
+    path="/all",
+    description="Get all products in the database.",
+    tags=["get"],
+    responses={
+        status.HTTP_200_OK: {
+            "model": ProductList
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def get_all_products(
+        product_form: GetProductForm = Depends(GetProductForm.as_form),
+        order: OrderEnum = OrderEnum.random
+):
+    product_form = product_form.model_dump()
+    product_form = dict_delete_none(product_form)
+    product_form = GetProductForm(**product_form)
+    print(product_form)
+
+    sql = f"""
+        SELECT * FROM `Product` WHERE 
+    """
+    sql += filter_by("price", min_value=product_form.from_price, max_value=product_form.to_price) + " AND "
+    sql += filter_by("stock", min_value=product_form.from_stock, max_value=product_form.to_stock) + " AND "
+    if product_form.shop_uuid is not None:
+        sql += filter_by("shop_uuid", value=product_form.shop_uuid) + " AND "
+    if product_form.is_active is not None:
+        sql += filter_by("is_active", value=product_form.is_active) + " AND "
+    if product_form.tags is not None:
+        sql += filter_by("tags", value=product_form.tags) + " AND "
+
+    sql = sql[:-5]
+
+    if order is not None:
+        sql += order_by(order.value)
+
+    sql += interval(product_form.start, product_form.limit)
+
+    print(sql)
+    result = get_all_results(sql)
+
+    if result:
+        return ProductList(products=result)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"There is no product."
     )
