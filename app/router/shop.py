@@ -38,7 +38,6 @@ async def get_shop(shop_uuid: str):
 
     if result:
         shop = result[0]
-        shop["update_time"] = str(shop["update_time"])
         return Shop(**shop)
 
     raise HTTPException(
@@ -66,7 +65,6 @@ async def get_shop_by_account(
     result = get_all_results(sql, (account.account_uuid,))
     if result:
         shop = result[0]
-        shop["update_time"] = str(shop["update_time"])
         return Shop(**shop)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -99,7 +97,7 @@ async def create_shop(
         else:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Permission denied"
+                detail="Permission denied"
             )
 
     if await if_exists_in_db("Shop", "account_uuid", account.account_uuid):
@@ -121,7 +119,7 @@ async def create_shop(
         )
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Something went wrong"
+        detail="Create shop failed."
     )
 
 @router.put(
@@ -157,14 +155,14 @@ async def update_shop(
             if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Permission denied"
+                    detail="Permission denied"
                 )
     result = execute_query(sql, (sql_set_values + (id,)))
     if result:
         return UpdateShopForm(**shop_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Something went wrong"
+        detail="Something went wrong"
     )
 
 @router.get(
@@ -186,7 +184,7 @@ async def get_all_shops(
     if account.role != 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Permission denied"
+            detail="Permission denied"
         )
     sql = "SELECT * FROM `Shop`;"
     result = get_all_results(sql)
@@ -196,5 +194,5 @@ async def get_all_shops(
         return ShopList(shops=[Shop(**shop) for shop in result])
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"No shops found"
+        detail="No shops found"
     )
