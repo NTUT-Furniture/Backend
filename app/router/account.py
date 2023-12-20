@@ -110,7 +110,7 @@ async def create_account(
             )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Something went wrong."
+            detail="Create account failed."
         )
     except ValueError as e:
         raise HTTPException(
