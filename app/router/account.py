@@ -172,7 +172,7 @@ async def update_account(
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Something went wrong."
+                detail="Update account failed."
             )
     except ValueError as e:
         raise HTTPException(
