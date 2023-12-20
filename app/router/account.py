@@ -74,7 +74,7 @@ async def get_all_accounts(
     else:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Permission denied."
+            detail="Permission denied."
         )
 
 @router.post(
