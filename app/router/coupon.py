@@ -80,7 +80,7 @@ async def create_coupon(
         return Coupon(shop_uuid=shop_uuid, update_time=datetime.datetime.now(), **coupon_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Something wrong happened."
+        detail="Create coupon failed."
     )
 
 @router.put(
