@@ -71,7 +71,7 @@ async def create_product(
         return CreateProductResponse(shop_uuid=shop_uuid, product_uuid=product_id, **product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Something wrong happened."
+        detail="Create Product failed."
     )
 
 @router.put(
@@ -109,7 +109,7 @@ async def update_product(
         return UpdateProductForm(**product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Something wrong happened."
+        detail="Update product failed."
     )
 
 @router.get(
@@ -175,7 +175,6 @@ async def get_all_products(
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
     product_form = GetProductForm(**product_form)
-    print(product_form)
 
     sql = f"""
         SELECT * FROM `Product` WHERE 
@@ -196,12 +195,11 @@ async def get_all_products(
 
     sql += interval(product_form.start, product_form.limit)
 
-    print(sql)
     result = get_all_results(sql)
 
     if result:
         return ProductList(products=result)
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"There is no product."
+        detail="There is no product."
     )
