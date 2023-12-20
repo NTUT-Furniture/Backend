@@ -40,7 +40,7 @@ make sure no container is running
 
 ### PyCharm Hacks
 
-~~For GUI freaks fellows~~, you can run the backend with PyCharm's Run/Debug Configuration . To do so, follow the steps
+~~For GUI freak fellows~~, you can run the backend with PyCharm's Run/Debug Configuration . To do so, follow the steps
 below:
 
 * Docker configurations
