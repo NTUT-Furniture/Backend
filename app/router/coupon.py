@@ -56,7 +56,7 @@ async def create_coupon(
         if account.role != 1:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Only admin can create coupon for other shops."
+                detail="Only admin can create coupon for other shops."
             )
     else:
         shop_uuid = await get_shop_by_account_uuid(account_uuid=account.account_uuid)
