@@ -1,22 +1,37 @@
 create table Comment
 (
-    transaction_uuid varchar(64)                         not null,
-    account_uuid     varchar(64)                         not null,
-    text             varchar(512)                        not null,
-    likes            int                                 not null,
-    dislikes         int                                 not null,
-    update_time      timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
+    comment_uuid varchar(64)                         not null
+        primary key,
+    product_uuid varchar(64)                         not null,
+    account_uuid varchar(64)                         not null,
+    text         varchar(512)                        not null,
+    likes        int                                 not null,
+    dislikes     int                                 not null,
+    update_time  timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Comment_ibfk_1
-        foreign key (transaction_uuid) references Transaction (transaction_uuid),
+        foreign key (product_uuid) references Product (product_uuid),
     constraint Comment_ibfk_2
         foreign key (account_uuid) references Account (account_uuid)
 );
 
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('abc123-8998-11ee-bb92-42010aae0002', '831cd0d0-8916-11ee-bb92-42010aae0002', 'Great transaction! Fast delivery and excellent service.', 15, 2, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('def456-8998-11ee-bb92-42010aae0002', '831cdb41-8916-11ee-bb92-42010aae0002', 'Good experience overall. The product quality is impressive.', 10, 1, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('ghi789-8998-11ee-bb92-42010aae0002', '831cdd39-8916-11ee-bb92-42010aae0002', 'The coupon code worked perfectly, and I got a nice discount.', 8, 0, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('jkl012-8998-11ee-bb92-42010aae0002', '831cde2e-8916-11ee-bb92-42010aae0002', 'Easy ordering process. Looking forward to shopping again!', 12, 3, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('mno345-8998-11ee-bb92-42010aae0002', '831cdf1e-8916-11ee-bb92-42010aae0002', 'Delivery was a bit late, but the product is in good condition.', 5, 4, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('pqr678-8998-11ee-bb92-42010aae0002', '849c38d1-8916-11ee-bb92-42010aae0002', 'The festive coupon made my purchase much more affordable. Thank you!', 20, 1, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('stu901-8998-11ee-bb92-42010aae0002', '849c3d7c-8916-11ee-bb92-42010aae0002', 'Ordered two items, but one was missing. Contacted customer support for a resolution.', 6, 8, '2023-11-23 08:59:25');
-INSERT INTO NFT.Comment (transaction_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('vwx234-8998-11ee-bb92-42010aae0002', '849c3e36-8916-11ee-bb92-42010aae0002', 'Product quality is not up to expectations. Disappointed with the purchase.', 2, 15, '2023-11-23 08:59:25');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc5975-9f28-11ee-9df2-0242ac140002', '094527b3-f8f1-4dfc-82cb-066a48d29caa', '2dba33fc-345c-48e1-bdaa-62665648022b', 'Great product!', 10, 2, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6283-9f28-11ee-9df2-0242ac140002', '1a234567-8998-11ee-bb92-42010aae0002', '325ea530-8f2f-11ee-8b4f-42010aae0002', 'Awesome features!', 15, 4, '2023-12-20 11:08:59');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6458-9f28-11ee-9df2-0242ac140002', '2b345678-8998-11ee-bb92-42010aae0002', '4001309d-8f2f-11ee-8b4f-42010aae0002', 'I love it!', 20, 0, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6534-9f28-11ee-9df2-0242ac140002', '3c456789-8998-11ee-bb92-42010aae0002', '5f0f6adf-4fde-42c0-bc75-6d51a670924c', 'Could be better.', 5, 8, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc65e8-9f28-11ee-9df2-0242ac140002', '4d567890-8998-11ee-bb92-42010aae0002', '76eafe7a-8d1d-11ee-bb92-42010aae0002', 'Not impressed.', 2, 12, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc66a7-9f28-11ee-9df2-0242ac140002', '5e678901-8998-11ee-bb92-42010aae0002', '7f4d7718-9df9-48d5-92e2-678cfbf09a7b', 'Good value for money, yaaa.', 8, 3, '2023-12-20 11:09:12');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6788-9f28-11ee-9df2-0242ac140002', '6f789012-8998-11ee-bb92-42010aae0002', '831cd0d0-8916-11ee-bb92-42010aae0002', 'Impressive design!', 18, 0, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6918-9f28-11ee-9df2-0242ac140002', '7g890123-8998-11ee-bb92-42010aae0002', '831cdb41-8916-11ee-bb92-42010aae0002', 'User-friendly interface.', 14, 2, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc69fd-9f28-11ee-9df2-0242ac140002', '8h901234-8998-11ee-bb92-42010aae0002', '831cdd39-8916-11ee-bb92-42010aae0002', 'Satisfied customer.', 10, 1, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6aa5-9f28-11ee-9df2-0242ac140002', '9802e81f-eabb-43d0-8317-79ff9e1fdda8', '831cde2e-8916-11ee-bb92-42010aae0002', 'Highly recommended!', 25, 0, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6b56-9f28-11ee-9df2-0242ac140002', '9ad60764-5834-44ee-b328-e34714659212', '831cdf1e-8916-11ee-bb92-42010aae0002', 'Great buy!', 12, 4, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6bf1-9f28-11ee-9df2-0242ac140002', 'fdf706e4-1cca-43c4-89dd-1cd8f01c69ed', '849c38d1-8916-11ee-bb92-42010aae0002', 'Quality product.', 16, 1, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6c9a-9f28-11ee-9df2-0242ac140002', '094527b3-f8f1-4dfc-82cb-066a48d29caa', '849c3d7c-8916-11ee-bb92-42010aae0002', 'Impressed with the performance.', 20, 2, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6d1d-9f28-11ee-9df2-0242ac140002', '1a234567-8998-11ee-bb92-42010aae0002', '849c3e36-8916-11ee-bb92-42010aae0002', 'Not bad.', 8, 5, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6dcd-9f28-11ee-9df2-0242ac140002', '2b345678-8998-11ee-bb92-42010aae0002', '849c3eba-8916-11ee-bb92-42010aae0002', 'Fast shipping!', 15, 0, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6f3c-9f28-11ee-9df2-0242ac140002', '3c456789-8998-11ee-bb92-42010aae0002', '849c3f2b-8916-11ee-bb92-42010aae0002', 'Disappointed.', 3, 10, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc6fc2-9f28-11ee-9df2-0242ac140002', '4d567890-8998-11ee-bb92-42010aae0002', 'a3711878-44ae-4328-ad62-4ed45b57c848', 'Could use some improvements.', 6, 7, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc7058-9f28-11ee-9df2-0242ac140002', '5e678901-8998-11ee-bb92-42010aae0002', 'ad593cad-96fb-4ebe-a5e4-a0b9101a8d5c', 'Excellent customer service!', 22, 0, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc7112-9f28-11ee-9df2-0242ac140002', '6f789012-8998-11ee-bb92-42010aae0002', 'cde5df65-8e91-11ee-8b4f-42010aae0002', 'Happy with my purchase.', 18, 2, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc71ca-9f28-11ee-9df2-0242ac140002', '7g890123-8998-11ee-bb92-42010aae0002', 'dc7de7cd-22bc-4a45-90bb-74bbc3ff8760', 'Not recommended.', 1, 15, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc727f-9f28-11ee-9df2-0242ac140002', '8h901234-8998-11ee-bb92-42010aae0002', 'ddaa8cf0-8db0-11ee-bb92-42010aae0002', 'Great value!', 14, 3, '2023-12-20 11:08:07');
