@@ -4,7 +4,7 @@ create table Coupon
     discount    int                                 not null,
     coupon_code varchar(16)                         not null,
     expire_time datetime                            not null,
-    update_time timestamp default CURRENT_TIMESTAMP null,
+    update_time timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Coupon_ibfk_1
         foreign key (shop_uuid) references Shop (shop_uuid)
 );

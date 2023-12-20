@@ -5,7 +5,7 @@ create table Comment
     text             varchar(512)                        not null,
     likes            int                                 not null,
     dislikes         int                                 not null,
-    update_time      timestamp default CURRENT_TIMESTAMP null,
+    update_time      timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Comment_ibfk_1
         foreign key (transaction_uuid) references Transaction (transaction_uuid),
     constraint Comment_ibfk_2
