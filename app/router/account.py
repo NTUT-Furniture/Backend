@@ -37,7 +37,7 @@ async def get_account(
         status.HTTP_200_OK: {
             "model": AccountList
         },
-        status.HTTP_400_BAD_REQUEST: {
+        status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
         }, status.HTTP_403_FORBIDDEN: {
             "model": ErrorModel
@@ -68,8 +68,8 @@ async def get_all_accounts(
             return AccountList(accounts=[Account(**account) for account in result])
         else:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Something wrong happened."
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No account found."
             )
     else:
         raise HTTPException(
