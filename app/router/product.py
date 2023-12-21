@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated
+from typing import Annotated, Dict
 
 from fastapi import APIRouter, Depends, status, HTTPException
 
@@ -93,9 +93,7 @@ async def update_product(
     if not await auth.if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorModel(
-                msg=f"Account {account.account_uuid} does not own product {product_uuid}"
-            )
+            detail=f"Account {account.account_uuid} does not own product {product_uuid}"
         )
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
@@ -195,10 +193,10 @@ async def get_all_products(
 
     sql += interval(product_form.start, product_form.limit)
 
-    result = get_all_results(sql)
+    result: Dict = get_all_results(sql)
 
     if result:
-        return ProductList(products=result)
+        return ProductList(products=[Product(**product) for product in result])
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="There is no product."
