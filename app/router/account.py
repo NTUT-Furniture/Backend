@@ -56,6 +56,7 @@ async def get_all_accounts(
                 name,
                 email,
                 phone,
+                credit_card,
                 birthday,
                 address,
                 is_active,
