@@ -178,5 +178,5 @@ async def update_account(
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=ErrorModel(msg=str(e)).model_dump()
+            detail=str(e)
         )
