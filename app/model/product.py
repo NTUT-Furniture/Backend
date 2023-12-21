@@ -48,6 +48,9 @@ class UpdateProductForm(BaseModel):
     description: str | None = None
     is_active: int | None = None
 
+class UpdateProductResponse(BaseModel):
+    product_uuid: str
+
 class OrderEnum(str, Enum):
     product_uuid = "product_uuid"
     shop_uuid = "shop_uuid"

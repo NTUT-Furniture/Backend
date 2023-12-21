@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from app.model.account import Account
 from app.model.general import ErrorModel
 from app.model.product import (CreateProductForm, Product, CreateProductResponse,
-                               UpdateProductForm, ProductList, GetProductForm, OrderEnum,
+                               UpdateProductForm, UpdateProductResponse, ProductList, GetProductForm, OrderEnum,
                                )
 from app.utils import auth
 from app.utils.db_process import (get_all_results, execute_query, dict_to_sql_command, dict_delete_none,
@@ -77,7 +77,7 @@ async def create_product(
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
-            "model": UpdateProductForm
+            "model": UpdateProductResponse
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": ErrorModel
@@ -88,9 +88,24 @@ async def update_product(
         account: Annotated[Account, Depends(auth.get_current_active_user)],
         product_form: UpdateProductForm = Depends(UpdateProductForm.as_form)
 ):
+    """
+    example:
+    asd@gmail.com
+    123
+
+    product_uuid: 094527b3-f8f1-4dfc-82cb-066a48d29caa
+    """
     product_uuid = product_form.product_uuid
-    shop_uuid = product_form.shop_uuid
-    if not await auth.if_account_owns_product(account.account_uuid, shop_uuid, product_uuid):
+    sql = """
+        SELECT EXISTS(SELECT 1
+        FROM `Product` P, `Shop` S, `Account` A
+        WHERE P.shop_uuid = S.shop_uuid
+        AND S.account_uuid = A.account_uuid
+        AND P.product_uuid = %s
+        AND A.account_uuid = %s) AS Exist;
+    """
+    result = get_all_results(sql, (product_uuid, account.account_uuid))
+    if not result[0]['Exist']:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorModel(
@@ -99,14 +114,14 @@ async def update_product(
         )
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
-    sql_set_text, sql_set_values = dict_to_sql_command(product_form)
+    sql_set_text, sql_set_values = dict_to_sql_command(product_form, exclude_col=["product_uuid"])
     sql = f"""
         UPDATE `Product` SET {sql_set_text}
         WHERE product_uuid = %s;
     """
     result = execute_query(sql, (sql_set_values + (product_form["product_uuid"],)))
     if result:
-        return UpdateProductForm(**product_form)
+        return UpdateProductResponse(product_uuid=product_form["product_uuid"])
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Update product failed."
