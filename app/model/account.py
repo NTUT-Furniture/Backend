@@ -9,6 +9,7 @@ class Account(BaseModel):
     name: str
     email: EmailStr
     phone: str | None = None
+    credit_card: str | None = None
     birthday: datetime.date | None = None
     address: str | None = None
     is_active: int | None = 1
