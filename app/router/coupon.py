@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.model.account import Account
-from app.model.coupon import CouponList, CreateCouponForm, UpdateCouponForm, Coupon, CreateCouponResponse, UpdateCouponResponse
+from app.model.coupon import CouponList, CreateCouponForm, UpdateCouponForm, Coupon
 from app.model.general import ErrorModel
 from app.utils import auth
 from app.utils.db_process import get_all_results, execute_query, dict_to_sql_command, dict_delete_none
@@ -39,7 +39,7 @@ async def get_coupons(
 @router.post(
     "/", tags=["create"], responses={
         status.HTTP_201_CREATED: {
-            "model": CreateCouponResponse
+            "model": CreateCouponForm
         },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
@@ -57,7 +57,7 @@ async def create_coupon(
 
     "coupon_code": "NEWCODE",
     "discount": 10,
-    "expire_time": "2021-12-31 23:59:59"
+    "expire_time": "2024-12-31"
     """
     if account.role != 1:  
         raise HTTPException(
@@ -71,7 +71,7 @@ async def create_coupon(
     """
     result = execute_query(sql, tuple(coupon_form.values()))
     if result:
-        return CreateCouponResponse(coupon_code=coupon_form["coupon_code"])
+        return CreateCouponForm(**coupon_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Create coupon failed."
@@ -80,7 +80,7 @@ async def create_coupon(
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
-            "model": UpdateCouponResponse
+            "model": UpdateCouponForm
         },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
@@ -98,10 +98,10 @@ async def update_coupon(
 
         "coupon_code": "30OFFSHOP",
         "discount": 20,
-        "expire_time": "2077-12-31 23:59:59"
+        "expire_time": "2077-12-31"
 
         "coupon_code": "30OFFSHOP",
-        "expire_time": "2077-12-31 23:59:59"
+        "expire_time": "2077-12-31"
 
         "coupon_code": "30OFFSHOP",
         "discount": 20
@@ -124,9 +124,9 @@ async def update_coupon(
         sql, (sql_set_value + (coupon_form["coupon_code"],))
     )
     if result:
-        if "expire_time" in coupon_form:
-            coupon_form["expire_time"] = datetime.strptime(coupon_form["expire_time"], "%Y-%m-%d %H:%M:%S")
-        return UpdateCouponResponse(coupon_code=coupon_form["coupon_code"])
+        # if "expire_time" in coupon_form:
+        #     coupon_form["expire_time"] = datetime.strptime(coupon_form["expire_time"], "%Y-%m-%d %H:%M:%S")
+        return UpdateCouponForm(**coupon_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Update Coupon failed."

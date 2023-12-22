@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import List
 
 from pydantic import BaseModel
@@ -8,7 +8,7 @@ from app.utils.as_form import as_form
 class Coupon(BaseModel):
     coupon_code: str
     discount: int
-    expire_time: datetime
+    expire_time: date
     update_time: datetime
 
 class CouponList(BaseModel):
@@ -20,14 +20,8 @@ class CreateCouponForm(BaseModel):
     discount: int
     expire_time: str
 
-class CreateCouponResponse(BaseModel):
-    coupon_code: str
-
 @as_form
 class UpdateCouponForm(BaseModel):
     coupon_code: str
     discount: int | None = None
     expire_time: str | None = None
-
-class UpdateCouponResponse(BaseModel):
-    coupon_code: str
