@@ -68,6 +68,7 @@ def get_account(uuid: str) -> Account | None:
             name,
             email,
             phone,
+            credit_card,
             birthday,
             address,
             is_active,
