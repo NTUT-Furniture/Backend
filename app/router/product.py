@@ -1,6 +1,8 @@
 import uuid
-from typing import Annotated
 from datetime import datetime
+from typing import Annotated, Dict
+
+
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.model.account import Account
@@ -206,10 +208,10 @@ async def get_all_products(
 
     sql += interval(product_form.start, product_form.limit)
 
-    result = get_all_results(sql)
+    result: Dict = get_all_results(sql)
 
     if result:
-        return ProductList(products=result)
+        return ProductList(products=[Product(**product) for product in result])
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="There is no product."

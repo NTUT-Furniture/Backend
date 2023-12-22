@@ -14,6 +14,7 @@ class Product(BaseModel):
     price: int
     tags: str | None = None
     description: str | None = None
+    is_active: int | None = None
     update_time: datetime.datetime
 
 class ProductList(BaseModel):
