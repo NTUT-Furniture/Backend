@@ -70,12 +70,7 @@ async def create_product(
     """
     result = execute_query(sql, (product_id, shop_uuid, *product_form.values()))
     if result:
-        return ExecuteProductResponse(
-            shop_uuid=shop_uuid,
-            product_uuid=product_id,
-            **product_form,
-            update_time=datetime.now()
-        )
+        return CreateProductForm(**product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Create Product failed."
@@ -84,7 +79,7 @@ async def create_product(
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
-            "model": ExecuteProductResponse
+            "model": UpdateProductForm
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": ErrorModel
@@ -115,11 +110,7 @@ async def update_product(
     """
     result = execute_query(sql, (sql_set_values + (product_form["product_uuid"], account.account_uuid,)))
     if result:
-        sql = f"""
-            select * from Product where product_uuid = %s;
-        """
-        result = get_all_results(sql, (product_form["product_uuid"],))
-        return ExecuteProductResponse(**(result[0]))
+        return UpdateProductForm(**product_form)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Update product failed."
