@@ -1,12 +1,12 @@
 import uuid
 from typing import Annotated
-
+from datetime import datetime
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from app.model.account import Account
 from app.model.general import ErrorModel
-from app.model.product import (CreateProductForm, Product, CreateProductResponse,
-                               UpdateProductForm, UpdateProductResponse, ProductList, GetProductForm, OrderEnum,
+from app.model.product import (CreateProductForm, Product, ExecuteProductResponse,
+                               UpdateProductForm, ProductList, GetProductForm, OrderEnum,
                                )
 from app.utils import auth
 from app.utils.db_process import (get_all_results, execute_query, dict_to_sql_command, dict_delete_none,
@@ -47,7 +47,7 @@ async def get_product(
 @router.post(
     "/", tags=["create"], responses={
         status.HTTP_200_OK: {
-            "model": CreateProductResponse
+            "model": ExecuteProductResponse
         },
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorModel
@@ -68,7 +68,12 @@ async def create_product(
     """
     result = execute_query(sql, (product_id, shop_uuid, *product_form.values()))
     if result:
-        return CreateProductResponse(shop_uuid=shop_uuid, product_uuid=product_id, **product_form)
+        return ExecuteProductResponse(
+            shop_uuid=shop_uuid,
+            product_uuid=product_id,
+            **product_form,
+            update_time=datetime.now()
+        )
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Create Product failed."
@@ -77,7 +82,7 @@ async def create_product(
 @router.put(
     "/", tags=["update"], responses={
         status.HTTP_200_OK: {
-            "model": UpdateProductResponse
+            "model": ExecuteProductResponse
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": ErrorModel
@@ -95,33 +100,24 @@ async def update_product(
 
     product_uuid: 094527b3-f8f1-4dfc-82cb-066a48d29caa
     """
-    product_uuid = product_form.product_uuid
-    sql = """
-        SELECT EXISTS(SELECT 1
-        FROM `Product` P, `Shop` S, `Account` A
-        WHERE P.shop_uuid = S.shop_uuid
-        AND S.account_uuid = A.account_uuid
-        AND P.product_uuid = %s
-        AND A.account_uuid = %s) AS Exist;
-    """
-    result = get_all_results(sql, (product_uuid, account.account_uuid))
-    if not result[0]['Exist']:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorModel(
-                msg=f"Account {account.account_uuid} does not own product {product_uuid}"
-            )
-        )
     product_form = product_form.model_dump()
     product_form = dict_delete_none(product_form)
-    sql_set_text, sql_set_values = dict_to_sql_command(product_form, exclude_col=["product_uuid"])
+    sql_set_text, sql_set_values = dict_to_sql_command(product_form, exclude_col=["product_uuid"], prefix="P")
     sql = f"""
-        UPDATE `Product` SET {sql_set_text}
-        WHERE product_uuid = %s;
+        UPDATE Product AS P
+        LEFT JOIN Shop AS S ON P.shop_uuid = S.shop_uuid 
+        LEFT JOIN Account AS A ON S.account_uuid = A.account_uuid
+        SET {sql_set_text}
+        WHERE P.product_uuid = %s 
+          AND A.account_uuid = %s;
     """
-    result = execute_query(sql, (sql_set_values + (product_form["product_uuid"],)))
+    result = execute_query(sql, (sql_set_values + (product_form["product_uuid"], account.account_uuid,)))
     if result:
-        return UpdateProductResponse(product_uuid=product_form["product_uuid"])
+        sql = f"""
+            select * from Product where product_uuid = %s;
+        """
+        result = get_all_results(sql, (product_form["product_uuid"],))
+        return ExecuteProductResponse(**(result[0]))
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Update product failed."

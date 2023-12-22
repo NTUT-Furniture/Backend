@@ -61,14 +61,14 @@ def get_all_results(sql: str, param: Optional[Tuple] = None) -> Union[Dict, bool
 def execute_query(sql, param: Optional[Tuple] = None) -> bool:
     return execute_sql(sql, param)
 
-def dict_to_sql_command(_dict: Dict, exclude_col=None) -> Tuple[str, tuple]:
+def dict_to_sql_command(_dict: Dict, exclude_col=None, prefix="") -> Tuple[str, tuple]:
     if exclude_col is None:
         exclude_col = []
     sql_command = []
     values = tuple()
     for key, value in list(_dict.items()):
         if key not in exclude_col:
-            sql_command.append(f'{key}=%s')
+            sql_command.append(f'{prefix}.{key}=%s')
             values += (value,)
 
     return ",".join(sql_command), values

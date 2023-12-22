@@ -28,7 +28,7 @@ class CreateProductForm(BaseModel):
     description: str | None = None
     is_active: int | None = 1
 
-class CreateProductResponse(BaseModel):
+class ExecuteProductResponse(BaseModel):
     product_uuid: str
     shop_uuid: str
     name: str
@@ -37,6 +37,7 @@ class CreateProductResponse(BaseModel):
     tags: str | None = None
     description: str | None = None
     is_active: int | None = None
+    update_time: datetime.datetime
 
 @as_form
 class UpdateProductForm(BaseModel):
@@ -47,9 +48,6 @@ class UpdateProductForm(BaseModel):
     tags: str | None = None
     description: str | None = None
     is_active: int | None = None
-
-class UpdateProductResponse(BaseModel):
-    product_uuid: str
 
 class OrderEnum(str, Enum):
     product_uuid = "product_uuid"
