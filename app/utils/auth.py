@@ -81,8 +81,6 @@ def get_account(uuid: str) -> Account | None:
     result = db_process.get_all_results(script, (uuid,))
     if result:
         account = result[0]
-        if account["birthday"]:
-            account["birthday"] = account["birthday"].strftime("%Y-%m-%d")
         return Account(**account)
     return None
 

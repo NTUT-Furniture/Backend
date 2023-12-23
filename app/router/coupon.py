@@ -109,7 +109,7 @@ async def update_coupon(
     if account.role != 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Only admin can update coupon for other shops."
+            detail="Only admin can update coupon for other shops."
         )
     coupon_form = coupon_form.model_dump()
     coupon_form = dict_delete_none(coupon_form)
