@@ -9,7 +9,7 @@ create table Product
     tags         varchar(32)                         null,
     description  varchar(512)                        null,
     is_active    int       default 1                 null,
-    update_time  timestamp default CURRENT_TIMESTAMP null,
+    update_time  timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Product_ibfk_1
         foreign key (shop_uuid) references Shop (shop_uuid)
 );

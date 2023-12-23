@@ -11,7 +11,7 @@ create table Account
     address      varchar(256)                         null,
     is_active    tinyint(1) default 1                 null,
     role         int        default 0                 null,
-    update_time  timestamp  default CURRENT_TIMESTAMP null,
+    update_time  timestamp  default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Account_pk
         unique (email)
 );

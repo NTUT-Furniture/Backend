@@ -6,7 +6,7 @@ create table Shop
     name         varchar(64)                         not null,
     description  varchar(512)                        null,
     is_active    int       default 1                 null,
-    update_time  timestamp default CURRENT_TIMESTAMP null,
+    update_time  timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint account_uuid
         unique (account_uuid),
     constraint Shop_ibfk_1
