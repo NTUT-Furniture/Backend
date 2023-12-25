@@ -19,6 +19,7 @@ class TransactionProductLogList(BaseModel):
 class Transaction(BaseModel):
     transaction_uuid: str
     account_uuid: str
+    shop_uuid: str
     coupon_code: str | None = None
     receive_time: datetime.datetime | None = None
     status: TransactionStatusEnum
@@ -27,6 +28,7 @@ class Transaction(BaseModel):
 
 class TransactionCreate(BaseModel):
     account_uuid: str | None = None
+    shop_uuid: str
     coupon_code: str | None = None
     receive_time: datetime.datetime | None = None
     status: TransactionStatusEnum

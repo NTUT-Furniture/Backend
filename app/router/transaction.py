@@ -7,7 +7,8 @@ from starlette import status
 from app.model.account import Account
 from app.model.general import ErrorModel
 from app.model.transaction import TransactionList, Transaction, TransactionCreate, TransactionUpdate
-from app.utils.auth import get_current_active_user
+from app.router.shop import get_shop_by_account
+from app.utils.auth import get_current_active_user, if_shop_owns_product
 from app.utils.db_process import get_all_results, execute_query
 
 router = APIRouter(
@@ -59,6 +60,52 @@ async def get_transaction_list(
             )
         return {"transactions": result}
 
+@router.get(
+    path="/all",
+    responses={
+        status.HTTP_200_OK: {
+            "model": TransactionList
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorModel
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorModel
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def get_all_transaction_list(
+        account: Annotated[
+            Account,
+            Depends(get_current_active_user)],
+):
+    """
+    Get transaction list of all accounts.
+    :param account: Current logged in account
+    :return: TransactionList
+    :raises HTTPException 401: Unauthorized, HTTPException 403: Forbidden,    HTTPException 404: Not found
+    """
+    if account.role != 1:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission denied",
+        )
+
+    sql = "SELECT * FROM Transaction"
+
+    result = get_all_results(sql)
+
+    if result:
+        for transaction in result:
+            transaction["products"] = get_all_results(
+                "SELECT * FROM TransactionProductLog WHERE transaction_uuid = %s",
+                (transaction["transaction_uuid"],)
+            )
+        return {"transactions": result}
+
 @router.post(
     path="/",
     responses={
@@ -90,40 +137,56 @@ async def create_transaction(
 
     :raises HTTPException 401: Unauthorized, HTTPException 403: Forbidden,    HTTPException 404: Not found
     """
-
+    if len(transaction.products.transaction_product_logs) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No product in transaction",
+        )
     transaction_uuid = str(uuid.uuid4())
+    values: list[list] = []
+    for product in transaction.products.transaction_product_logs:
+        if not await if_shop_owns_product(shop_uuid=transaction.shop_uuid, product_uuid=product.product_uuid):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There's an impostor among the transaction products",
+            )
+        values.append(
+            [
+                transaction_uuid,
+                product.product_uuid,
+                product.quantity
+            ]
+        )
+
     account_uuid = transaction.account_uuid if transaction.account_uuid and account.role == 1 else account.account_uuid
+
     sql = """
     INSERT INTO 
     Transaction (transaction_uuid, account_uuid, coupon_code, receive_time, status) 
     VALUES (%s, %s, %s, %s, %s)
     """
-    values = (
+    transaction_values = (
         transaction_uuid,
         account_uuid,
         transaction.coupon_code,
         transaction.receive_time,
-        transaction.status
+        transaction.status.value
     )
 
-    result: bool = execute_query(sql, values)
-    if result:
-        for product in transaction.products.transaction_product_logs:
-            sql = """
-            INSERT INTO 
-            TransactionProductLog (transaction_uuid, product_uuid, quantity) 
-            VALUES (%s, %s, %s)
-            """
-            values = (
-                transaction_uuid,
-                product.product_uuid,
-                product.quantity
-            )
-            execute_query(sql, values)
+    result: bool = execute_query(sql, transaction_values)
+
+    sql = """
+        INSERT INTO 
+        TransactionProductLog (transaction_uuid, product_uuid, quantity) 
+        VALUES (%s, %s, %s)
+        """
+    for value in values:
+        execute_query(sql, tuple(value))
 
         return Transaction(
             transaction_uuid=transaction_uuid,
             account_uuid=account_uuid,
+            shop_uuid=transaction.shop_uuid,
             coupon_code=transaction.coupon_code,
             receive_time=transaction.receive_time,
             status=transaction.status,
@@ -171,7 +234,7 @@ async def update_transaction(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Transaction not found",
         )
-    if account.role != 1 and result[0]["account_uuid"] != transaction.account_uuid:
+    if account.role != 1 and result[0]["shop_uuid"] != (await get_shop_by_account(account)).shop_uuid:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permission denied",
