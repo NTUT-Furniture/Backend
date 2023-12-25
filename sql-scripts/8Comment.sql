@@ -5,8 +5,8 @@ create table Comment
     product_uuid varchar(64)                         not null,
     account_uuid varchar(64)                         not null,
     text         varchar(512)                        not null,
-    likes        int                                 not null,
-    dislikes     int                                 not null,
+    likes        int       default 0                 not null,
+    dislikes     int       default 0                 not null,
     update_time  timestamp default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     constraint Comment_ibfk_1
         foreign key (product_uuid) references Product (product_uuid),
@@ -35,3 +35,4 @@ INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, 
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc7112-9f28-11ee-9df2-0242ac140002', '6f789012-8998-11ee-bb92-42010aae0002', 'cde5df65-8e91-11ee-8b4f-42010aae0002', 'Happy with my purchase.', 18, 2, '2023-12-20 11:08:07');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc71ca-9f28-11ee-9df2-0242ac140002', '7g890123-8998-11ee-bb92-42010aae0002', 'dc7de7cd-22bc-4a45-90bb-74bbc3ff8760', 'Not recommended.', 1, 15, '2023-12-20 11:08:07');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc727f-9f28-11ee-9df2-0242ac140002', '8h901234-8998-11ee-bb92-42010aae0002', 'ddaa8cf0-8db0-11ee-bb92-42010aae0002', 'Great value!', 14, 3, '2023-12-20 11:08:07');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, likes, dislikes, update_time) VALUES ('0dbc727f-9f28-11ee-9df2-0242ac145697', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 'f81672f3-2925-4396-a33e-dd85a4c03ca1', 'i think mine product is awesome!', 1, 1000, '2023-12-25 20:31:56');
