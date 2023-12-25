@@ -1,12 +1,12 @@
 import uuid
-from typing import Annotated
+from typing import Annotated, Dict
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from starlette import status
 
 from app.model.account import Account
 from app.model.general import ErrorModel
-from app.model.transaction import TransactionList, Transaction, TransactionCreate
+from app.model.transaction import TransactionList, Transaction, TransactionCreate, TransactionUpdate
 from app.utils.auth import get_current_active_user
 from app.utils.db_process import get_all_results, execute_query
 
@@ -95,8 +95,8 @@ async def create_transaction(
     account_uuid = transaction.account_uuid if transaction.account_uuid and account.role == 1 else account.account_uuid
     sql = """
     INSERT INTO 
-    Transaction (transaction_uuid, account_uuid, coupon_code, receive_time, status, order_time) 
-    VALUES (%s, %s, %s, %s, %s, DEFAULT)
+    Transaction (transaction_uuid, account_uuid, coupon_code, receive_time, status) 
+    VALUES (%s, %s, %s, %s, %s)
     """
     values = (
         transaction_uuid,
@@ -128,4 +128,69 @@ async def create_transaction(
             receive_time=transaction.receive_time,
             status=transaction.status,
             products=transaction.products
+        )
+
+@router.put(
+    path="/{transaction_uuid}",
+    responses={
+        status.HTTP_200_OK: {
+            "model": TransactionUpdate
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorModel
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorModel
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def update_transaction(
+        account: Annotated[
+            Account,
+            Depends(get_current_active_user)],
+        transaction_uuid: str,
+        transaction: TransactionUpdate,
+):
+    """
+    Update a transaction. Admins may provide an account_uuid to update a transaction for that account.
+    :param account: Current logged in account
+    :param transaction_uuid: Transaction uuid
+    :param transaction: TransactionUpdate
+    :return: TransactionUpdate
+
+    :raises HTTPException 401: Unauthorized, HTTPException 403: Forbidden,    HTTPException 404: Not found
+    """
+
+    sql = "SELECT * FROM Transaction WHERE transaction_uuid = %s"
+    result: Dict = get_all_results(sql, (transaction_uuid,))
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Transaction not found",
+        )
+    if account.role != 1 and result[0]["account_uuid"] != transaction.account_uuid:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission denied",
+        )
+
+    sql = """
+    UPDATE Transaction
+    SET receive_time = %s, status = %s
+    WHERE transaction_uuid = %s
+    """
+    values = (
+        transaction.receive_time,
+        transaction.status,
+        transaction_uuid,
+    )
+
+    result: bool = execute_query(sql, values)
+    if result:
+        return TransactionUpdate(
+            receive_time=transaction.receive_time,
+            status=transaction.status
         )
