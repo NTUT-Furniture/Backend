@@ -19,6 +19,7 @@ class Transaction(BaseModel):
     products: TransactionProductLogList
 
 class TransactionCreate(BaseModel):
+    account_uuid: str | None = None
     coupon_code: str | None = None
     receive_time: datetime.datetime | None = None
     status: str
