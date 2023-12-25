@@ -26,7 +26,10 @@ CREATE TRIGGER check_transaction_coupon_code
     FOR EACH ROW
 BEGIN
     IF NEW.coupon_code IS NOT NULL THEN
-        IF NOT EXISTS (SELECT 1 FROM Coupon WHERE coupon_code = NEW.coupon_code) THEN
+        IF NOT EXISTS (SELECT 1
+                       FROM Coupon
+                       WHERE coupon_code = NEW.coupon_code
+                         and Coupon.expire_time >= convert_tz(now(), 'UTC', 'Asia/Taipei')) THEN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Invalid coupon code';
         END IF;
@@ -43,7 +46,10 @@ CREATE TRIGGER check_transaction_coupon_code_on_update
     FOR EACH ROW
 BEGIN
     IF NEW.coupon_code IS NOT NULL THEN
-        IF NOT EXISTS (SELECT 1 FROM Coupon WHERE coupon_code = NEW.coupon_code) THEN
+        IF NOT EXISTS (SELECT 1
+                       FROM Coupon
+                       WHERE coupon_code = NEW.coupon_code
+                         and Coupon.expire_time >= convert_tz(now(), 'UTC', 'Asia/Taipei')) THEN
             SIGNAL SQLSTATE '45000'
                 SET MESSAGE_TEXT = 'Invalid coupon code';
         END IF;
