@@ -12,10 +12,16 @@ class TransactionProductLogList(BaseModel):
 class Transaction(BaseModel):
     transaction_uuid: str
     account_uuid: str
-    coupon_uuid: str | None = None
-    receive_time: datetime.datetime
+    coupon_code: str | None = None
+    receive_time: datetime.datetime | None = None
+    status: str | None = None
+    order_time: datetime.datetime | None = None
+    products: TransactionProductLogList
+
+class TransactionCreate(BaseModel):
+    coupon_code: str | None = None
+    receive_time: datetime.datetime | None = None
     status: str
-    order_time: datetime.datetime
     products: TransactionProductLogList
 
 class TransactionList(BaseModel):
