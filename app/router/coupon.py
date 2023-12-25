@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -59,7 +58,7 @@ async def create_coupon(
     "discount": 10,
     "expire_time": "2024-12-31"
     """
-    if account.role != 1:  
+    if account.role != 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only admin can create coupon."
@@ -114,9 +113,9 @@ async def update_coupon(
     coupon_form = coupon_form.model_dump()
     coupon_form = dict_delete_none(coupon_form)
 
-    sql_set_text, sql_set_value = dict_to_sql_command(coupon_form, exclude_col=["coupon_code"])
+    sql_set_text, sql_set_value = dict_to_sql_command(coupon_form, exclude_col=["coupon_code"], prefix='C')
     sql = f"""
-        UPDATE `Coupon`
+        UPDATE `Coupon` as C 
         set {sql_set_text}
         WHERE coupon_code = %s;
     """
