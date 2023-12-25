@@ -81,10 +81,9 @@ async def create_transaction(
             Account,
             Depends(get_current_active_user)],
         transaction: TransactionCreate,
-        account_uuid: str | None = None,
 ):
     """
-    Create a transaction.
+    Create a transaction. Admins may provide an account_uuid to create a transaction for that account.
     :param account: Current logged in account
     :param transaction: TransactionCreate
     :return: Transaction
@@ -93,6 +92,7 @@ async def create_transaction(
     """
 
     transaction_uuid = str(uuid.uuid4())
+    account_uuid = transaction.account_uuid if transaction.account_uuid and account.role == 1 else account.account_uuid
     sql = """
     INSERT INTO 
     Transaction (transaction_uuid, account_uuid, coupon_code, receive_time, status, order_time) 
@@ -100,7 +100,7 @@ async def create_transaction(
     """
     values = (
         transaction_uuid,
-        account.account_uuid if not (account_uuid and account.role == 1) else account_uuid,
+        account_uuid,
         transaction.coupon_code,
         transaction.receive_time,
         transaction.status
@@ -123,7 +123,7 @@ async def create_transaction(
 
         return Transaction(
             transaction_uuid=transaction_uuid,
-            account_uuid=account.account_uuid if not (account_uuid and account.role == 1) else account_uuid,
+            account_uuid=account_uuid,
             coupon_code=transaction.coupon_code,
             receive_time=transaction.receive_time,
             status=transaction.status,
