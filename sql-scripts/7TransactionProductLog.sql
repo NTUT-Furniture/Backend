@@ -31,3 +31,14 @@ BEGIN
             SET MESSAGE_TEXT = 'This product does not belong to the same shop as the transaction';
     END IF;
 END;
+
+INSERT INTO NFT.TransactionProductLog (transaction_uuid, product_uuid, quantity)
+VALUES ('3dbb0f4f-7e4b-4de4-beed-1179dd9241d0', '4d567890-8998-11ee-bb92-42010aae0002', 213);
+INSERT INTO NFT.TransactionProductLog (transaction_uuid, product_uuid, quantity)
+VALUES ('3dbb0f4f-7e4b-4de4-beed-1179dd9241d0', '9802e81f-eabb-43d0-8317-79ff9e1fdda8', 213);
+INSERT INTO NFT.TransactionProductLog (transaction_uuid, product_uuid, quantity)
+VALUES ('d5736bee-70c1-4f52-a767-a83a8ec4156b', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 0);
+INSERT INTO NFT.TransactionProductLog (transaction_uuid, product_uuid, quantity)
+VALUES ('7ae4c64d-17ac-452d-a965-a52b4b948e91', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 0);
+INSERT INTO NFT.TransactionProductLog (transaction_uuid, product_uuid, quantity)
+VALUES ('e96af1b3-2407-490d-9930-c76a57fdb97a', '1a234567-8998-11ee-bb92-42010aae0002', 0);
