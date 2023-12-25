@@ -114,7 +114,7 @@ async def create_shop(
         return Shop(
             shop_uuid=shop_id,
             account_uuid=account.account_uuid,
-            update_time=str(datetime.now()),
+            update_time=datetime.now(),
             **shop_form
         )
     raise HTTPException(
@@ -144,12 +144,12 @@ async def update_shop(
 ):
     shop_form = dict_delete_none(shop_form.model_dump())
 
-    sql_set_text, sql_set_values = dict_to_sql_command(shop_form)
-    sql = f"UPDATE `Shop` SET {sql_set_text} WHERE account_uuid = %s;"
+    sql_set_text, sql_set_values = dict_to_sql_command(shop_form, prefix="S")
+    sql = f"UPDATE `Shop` as S SET {sql_set_text} WHERE account_uuid = %s;"
     id = account.account_uuid
     if shop_uuid:
         if account.role == 1:
-            sql = f"UPDATE `Shop` SET {sql_set_text} WHERE shop_uuid = %s;"
+            sql = f"UPDATE `Shop` as S SET {sql_set_text} WHERE shop_uuid = %s;"
             id = shop_uuid
         else:
             if not await auth.if_account_owns_shop(account.account_uuid, shop_uuid):

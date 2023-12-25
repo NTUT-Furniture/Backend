@@ -34,7 +34,9 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
             if result:
                 column_names = [desc[0] for desc in cursor.description]
                 result = [dict(zip(column_names, row)) for row in result]
-
+                [result_row.update(
+                    {"update_time": result_row["update_time"].strftime("%Y-%m-%d %H:%M:%S")}
+                    ) if "update_time" in result_row else result_row for result_row in result]
         else:
             result = count != 0
             connection.commit()
@@ -61,14 +63,14 @@ def get_all_results(sql: str, param: Optional[Tuple] = None) -> Union[Dict, bool
 def execute_query(sql, param: Optional[Tuple] = None) -> bool:
     return execute_sql(sql, param)
 
-def dict_to_sql_command(_dict: Dict, exclude_col=None) -> Tuple[str, tuple]:
+def dict_to_sql_command(_dict: Dict, exclude_col=None, prefix="") -> Tuple[str, tuple]:
     if exclude_col is None:
         exclude_col = []
     sql_command = []
     values = tuple()
     for key, value in list(_dict.items()):
         if key not in exclude_col:
-            sql_command.append(f'{key}=%s')
+            sql_command.append(f'{prefix}.{key}=%s')
             values += (value,)
 
     return ",".join(sql_command), values

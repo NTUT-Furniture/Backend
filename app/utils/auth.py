@@ -82,13 +82,6 @@ def get_account(uuid: str) -> Account | None:
     result = db_process.get_all_results(script, (uuid,))
     if result:
         account = result[0]
-        if account["birthday"]:
-            account["birthday"] = account["birthday"].strftime("%Y-%m-%d")
-        if account["update_time"]:
-            account["update_time"] = datetime(
-                account["update_time"].year, account["update_time"].month,
-                account["update_time"].day, tzinfo=pytz.timezone('Asia/Taipei')
-            )
         return Account(**account)
     return None
 

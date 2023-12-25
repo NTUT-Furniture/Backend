@@ -116,7 +116,7 @@ async def create_account(
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=ErrorModel(msg=str(e)).model_dump()
+            detail=str(e)
         )
 
 @router.put(
@@ -152,10 +152,10 @@ async def update_account(
         form = dict_delete_none(form)
         if 'pwd' in form:
             form['pwd'] = auth.get_password_hash(form['pwd'])
-        sql_set_text, sql_set_values = dict_to_sql_command(form)
+        sql_set_text, sql_set_values = dict_to_sql_command(form, prefix='A')
 
         sql = f"""
-            UPDATE `Account` SET {sql_set_text}
+            UPDATE `Account` as A SET {sql_set_text}
             WHERE account_uuid = %s;
         """
         if account_uuid:
