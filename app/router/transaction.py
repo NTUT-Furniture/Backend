@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -5,9 +6,9 @@ from starlette import status
 
 from app.model.account import Account
 from app.model.general import ErrorModel
-from app.model.transaction import TransactionList
+from app.model.transaction import TransactionList, Transaction, TransactionCreate
 from app.utils.auth import get_current_active_user
-from app.utils.db_process import get_all_results
+from app.utils.db_process import get_all_results, execute_query
 
 router = APIRouter(
     tags=["account", "transaction", "product", "coupon", "shop"]
@@ -57,3 +58,74 @@ async def get_transaction_list(
                 (transaction["transaction_uuid"],)
             )
         return {"transactions": result}
+
+@router.post(
+    path="/",
+    responses={
+        status.HTTP_201_CREATED: {
+            "model": Transaction
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": ErrorModel
+        },
+        status.HTTP_403_FORBIDDEN: {
+            "model": ErrorModel
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorModel
+        }
+    }
+)
+async def create_transaction(
+        account: Annotated[
+            Account,
+            Depends(get_current_active_user)],
+        transaction: TransactionCreate,
+        account_uuid: str | None = None,
+):
+    """
+    Create a transaction.
+    :param account: Current logged in account
+    :param transaction: TransactionCreate
+    :return: Transaction
+
+    :raises HTTPException 401: Unauthorized, HTTPException 403: Forbidden,    HTTPException 404: Not found
+    """
+
+    transaction_uuid = str(uuid.uuid4())
+    sql = """
+    INSERT INTO 
+    Transaction (transaction_uuid, account_uuid, coupon_code, receive_time, status, order_time) 
+    VALUES (%s, %s, %s, %s, %s, DEFAULT)
+    """
+    values = (
+        transaction_uuid,
+        account.account_uuid if not (account_uuid and account.role == 1) else account_uuid,
+        transaction.coupon_code,
+        transaction.receive_time,
+        transaction.status
+    )
+
+    result: bool = execute_query(sql, values)
+    if result:
+        for product in transaction.products.transaction_product_logs:
+            sql = """
+            INSERT INTO 
+            TransactionProductLog (transaction_uuid, product_uuid, quantity) 
+            VALUES (%s, %s, %s)
+            """
+            values = (
+                transaction_uuid,
+                product.product_uuid,
+                product.quantity
+            )
+            execute_query(sql, values)
+
+        return Transaction(
+            transaction_uuid=transaction_uuid,
+            account_uuid=account.account_uuid if not (account_uuid and account.role == 1) else account_uuid,
+            coupon_code=transaction.coupon_code,
+            receive_time=transaction.receive_time,
+            status=transaction.status,
+            products=transaction.products
+        )
