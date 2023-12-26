@@ -8,6 +8,7 @@ from .product import router as product_router
 from .shop import router as shop_router
 from .subscription import router as subscription_router
 from .transaction import router as transaction_router
+from .comment import router as comment_router
 
 def register_router(app):
     router = APIRouter()
@@ -19,5 +20,6 @@ def register_router(app):
     router.include_router(login_router)
     router.include_router(subscription_router, prefix="/subscription")
     router.include_router(transaction_router, prefix="/transaction")
+    router.include_router(comment_router, prefix="/comment")
 
     app.include_router(router, prefix="/api")
