@@ -14,9 +14,9 @@ create table Transaction
     constraint Transaction_ibfk_3
         foreign key (shop_uuid) references Shop (shop_uuid),
     constraint Receive_after_arrive_check
-        check ((`receive_time` is null) or (`status` = _utf8mb4\'Arrived\')),
-	constraint Transaction_status_check
-		check (`status` in (_utf8mb4\'Ordered\',_utf8mb4\'Delivering\',_utf8mb4\'Arrived\',_utf8mb4\'Cancelled\'))
+        check ((`receive_time` is null) or (`status` = 'Arrived')),
+    constraint Transaction_status_check
+        check (`status` in ('Ordered','Delivering','Arrived','Cancelled'))
 );
 
 INSERT INTO NFT.Transaction (transaction_uuid, account_uuid, shop_uuid, coupon_code, receive_time, status, order_time, update_time) VALUES ('325ea530-8f2f-11ee-8b4f-42010aae0002', '831cde2e-8916-11ee-bb92-42010aae0002', 'f150b186-8998-11ee-bb92-42010aae0002', null, '2023-12-26 17:20:47', 'Arrived', '2023-12-26 09:21:01', '2023-12-26 09:29:24');
