@@ -95,7 +95,7 @@ async def create_comment(
     sql = """
         INSERT INTO Comment 
         VALUES (
-            %s, %s, %s, %s, DEFAULT, DEFAULT, DEFAULT
+            %s, %s, %s, %s, DEFAULT
         )
     """
 
