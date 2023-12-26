@@ -38,5 +38,12 @@ class CreateCommentForm(BaseModel):
 class UpdateCommentForm(BaseModel):
     comment_uuid: str
     text: str | None = None
-    likes: int | None = None
-    dislikes: int | None = None
+
+@as_form
+class CreateLikeForm(BaseModel):
+    comment_uuid: str
+    if_hates: int
+
+@as_form
+class DeleteLikeForm(BaseModel):
+    comment_uuid: str
