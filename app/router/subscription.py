@@ -23,33 +23,22 @@ router = APIRouter(
     },
 )
 async def get_subscription(
-        account: Annotated[
-            Account,
-            Depends(auth.get_current_active_user)],
-        target: TargetEnum,
-        account_uuid: str | None = None,
-        shop_uuid: str | None = None
+        uuid_type: TargetEnum,
+        uuid: str | None = None,
 ):
-    if target == TargetEnum.account_uuid:
-        target_uuid = account.account_uuid
-        if account.role == 1 and account_uuid:
-            target_uuid = account_uuid
-    else:
-        if account.role == 1 and shop_uuid:
-            target_uuid = shop_uuid
-        else:
-            target_uuid = await get_shop_by_account_uuid(account.account_uuid)
-
+    table = "Shop" if uuid_type == TargetEnum.account_uuid else "Account"
+    target = TargetEnum.shop_uuid if uuid_type == TargetEnum.account_uuid else TargetEnum.account_uuid
     script = f"""
         SELECT 
-            account_uuid,
-            shop_uuid
-        FROM Subscription
-        WHERE {target.value} = %s
+            S.{target.value} AS uuid,
+            T.name
+        FROM Subscription AS S
+        LEFT JOIN {table} AS T ON S.{target.value} = T.{target.value}
+        WHERE S.{uuid_type.value} = %s
     """
-    result = get_all_results(script, (target_uuid,))
+    result = get_all_results(script, (uuid,))
     if result:
-        return SubscriptionList(subscriptions=[Subscription(**subscription) for subscription in result])
+        return SubscriptionList(type=target.value, subscriptions=[Subscription(**subscription) for subscription in result])
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Subscription not found."
