@@ -17,7 +17,7 @@ def if_exists(file_path: str, target_filename: str) -> bool:
     return False
 
 def get_directory_path(owner_id: str) -> str:
-    path = f"../upload_images/{owner_id}"
+    path = f"upload_images/{owner_id}"
     return path
 
 def get_filename(file: UploadFile, image_type: ImageTypeEnum) -> str:
@@ -61,22 +61,6 @@ async def save_file(file: Optional[UploadFile], owner_id: str, image_type: Image
 
 async def get_file(owner_uuid: str, image_type: ImageTypeEnum) -> Union[FileResponse, JSONResponse]:
     directory_path = get_directory_path(owner_uuid)
-    if not os.path.exists(directory_path):
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=jsonable_encoder(
-                {
-                    "msg": f"uuid {owner_uuid} haven't upload any image yet"
-                }
-            )
-        )
-    if not if_exists(directory_path, image_type):
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content=jsonable_encoder(
-                {
-                    "msg": f"uuid {owner_uuid} haven't upload {image_type.value} yet"
-                }
-            )
-        )
+    if not os.path.exists(directory_path) or not if_exists(directory_path, image_type):
+        return FileResponse(f"upload_images/default/{image_type.value}.png")
     return FileResponse(f"{directory_path}/{image_type.value}.png")
