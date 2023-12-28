@@ -21,7 +21,6 @@ def get_directory_path(owner_id: str) -> str:
     return path
 
 def get_filename(file: UploadFile, image_type: ImageTypeEnum) -> str:
-    _, filetype = file.filename.split(".")
     return f"{image_type.value}.png"
 
 async def save_file(file: Optional[UploadFile], owner_id: str, image_type: ImageTypeEnum) -> JSONResponse:
@@ -30,7 +29,7 @@ async def save_file(file: Optional[UploadFile], owner_id: str, image_type: Image
             status_code=400,
             content=f"File must be jpeg or png format! Get {file.content_type} instead!"
         )
-    if file.size > MAX_FILE_SIZE:
+    if file.size >= MAX_FILE_SIZE:
         return JSONResponse(
             status_code=400,
             content=f"File size must be less than 10MB! The file uploaded is  {file.size} Bytes!"
@@ -46,7 +45,7 @@ async def save_file(file: Optional[UploadFile], owner_id: str, image_type: Image
         # TODO: log the error
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content=f"Error when saving file"
+            content=f"Error when saving file: {e}"
         )
     return JSONResponse(
         status_code=status.HTTP_200_OK,
