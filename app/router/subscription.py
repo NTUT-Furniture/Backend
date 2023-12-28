@@ -36,7 +36,6 @@ async def get_subscription(
         LEFT JOIN {table} AS T ON S.{target.value} = T.{target.value}
         WHERE S.{uuid_type.value} = %s
     """
-    print(script)
     result = get_all_results(script, (uuid,))
     if result:
         return SubscriptionList(type=target.value, subscriptions=[Subscription(**subscription) for subscription in result])
