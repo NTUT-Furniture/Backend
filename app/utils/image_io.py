@@ -10,11 +10,11 @@ from app.model.image import ImageTypeEnum
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
-def if_exists(file_path: str, target_filename: str) -> Union[None, str]:
+def if_exists(file_path: str, target_filename: str) -> bool:
     for filename in os.listdir(file_path):
         if os.path.splitext(filename)[0] == target_filename:
-            return os.path.splitext(filename)[1]
-    return None
+            return True
+    return False
 
 def get_directory_path(owner_id: str) -> str:
     path = f"../upload_images/{owner_id}"
@@ -22,7 +22,7 @@ def get_directory_path(owner_id: str) -> str:
 
 def get_filename(file: UploadFile, image_type: ImageTypeEnum) -> str:
     _, filetype = file.filename.split(".")
-    return f"{image_type.value}.{filetype}"
+    return f"{image_type.value}.png"
 
 async def save_file(file: Optional[UploadFile], owner_id: str, image_type: ImageTypeEnum) -> JSONResponse:
     if file.content_type not in ["image/jpeg", "image/png"]:
@@ -71,8 +71,7 @@ async def get_file(owner_uuid: str, image_type: ImageTypeEnum) -> Union[FileResp
                 }
             )
         )
-    ext = if_exists(directory_path, image_type)
-    if ext is None:
+    if not if_exists(directory_path, image_type):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
             content=jsonable_encoder(
@@ -81,4 +80,4 @@ async def get_file(owner_uuid: str, image_type: ImageTypeEnum) -> Union[FileResp
                 }
             )
         )
-    return FileResponse(f"{directory_path}/{image_type.value}{ext}")
+    return FileResponse(f"{directory_path}/{image_type.value}.png")
