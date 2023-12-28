@@ -12,7 +12,7 @@ create table Comment
         foreign key (account_uuid) references Account (account_uuid)
 );
 
-INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0724e9e8-58aa-48a6-a5b9-1443a1062601', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 'f81672f3-2925-4396-a33e-dd85a4c03ca1', 'agvebreabae', '2023-12-26 08:43:12');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0724e9e8-58aa-48a6-a5b9-1443a1062601', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 'f81672f3-2925-4396-a33e-dd85a4c03ca1', 'nice', '2023-12-28 06:05:59');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0dbc5975-9f28-11ee-9df2-0242ac140002', '094527b3-f8f1-4dfc-82cb-066a48d29caa', '2dba33fc-345c-48e1-bdaa-62665648022b', 'Great product!', '2023-12-20 11:08:07');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0dbc6283-9f28-11ee-9df2-0242ac140002', '1a234567-8998-11ee-bb92-42010aae0002', '325ea530-8f2f-11ee-8b4f-42010aae0002', 'Awesome features!', '2023-12-20 11:08:59');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0dbc6458-9f28-11ee-9df2-0242ac140002', '2b345678-8998-11ee-bb92-42010aae0002', '4001309d-8f2f-11ee-8b4f-42010aae0002', 'I love it!', '2023-12-20 11:08:07');
@@ -35,4 +35,4 @@ INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0dbc71ca-9f28-11ee-9df2-0242ac140002', '7g890123-8998-11ee-bb92-42010aae0002', 'dc7de7cd-22bc-4a45-90bb-74bbc3ff8760', 'Not recommended.', '2023-12-20 11:08:07');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0dbc727f-9f28-11ee-9df2-0242ac140002', '8h901234-8998-11ee-bb92-42010aae0002', 'ddaa8cf0-8db0-11ee-bb92-42010aae0002', 'Great value!', '2023-12-20 11:08:07');
 INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('0dbc727f-9f28-11ee-9df2-0242ac145697', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 'f81672f3-2925-4396-a33e-dd85a4c03ca1', 'i think mine product is awesome!', '2023-12-25 20:31:56');
-INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('77c0adc9-dc73-4fb9-9b07-c9a57827c2aa', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 'f81672f3-2925-4396-a33e-dd85a4c03ca1', 'agvebreabaesdasdsad', '2023-12-26 08:43:19');
+INSERT INTO NFT.Comment (comment_uuid, product_uuid, account_uuid, text, update_time) VALUES ('77c0adc9-dc73-4fb9-9b07-c9a57827c2aa', '094527b3-f8f1-4dfc-82cb-066a48d29caa', 'f81672f3-2925-4396-a33e-dd85a4c03ca1', 'poor design', '2023-12-28 06:06:40');
