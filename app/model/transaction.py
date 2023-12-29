@@ -25,7 +25,7 @@ class Transaction(BaseModel):
     transaction_uuid: str
     account_uuid: str
     shop_uuid: str
-    coupon_code: str | None = None
+    discount: float | None = None
     receive_time: datetime.datetime | None = None
     status: TransactionStatusEnum
     order_time: datetime.datetime | None = None
