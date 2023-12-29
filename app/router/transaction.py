@@ -60,13 +60,22 @@ async def get_transaction_list(
         account_uuid = account.account_uuid
 
     sql = f"""
-        SELECT T.*, TPL.product_uuid, TPL.quantity, P.price
-        FROM 
-        Transaction T 
-        left join NFT.TransactionProductLog TPL 
-        on T.transaction_uuid = TPL.transaction_uuid 
-        left join NFT.Product P 
-        on TPL.product_uuid = P.product_uuid
+        SELECT T.transaction_uuid,
+           T.account_uuid,
+           T.shop_uuid,
+           T.receive_time,
+           T.status,
+           T.order_time,
+           C.discount,
+           TPL.product_uuid,
+           TPL.quantity,
+           P.name,
+           P.price,
+           P.description
+        from Transaction T
+         left join NFT.TransactionProductLog TPL on T.transaction_uuid = TPL.transaction_uuid
+         left join NFT.Product P on TPL.product_uuid = P.product_uuid
+         left join Coupon C on T.coupon_uuid = C.coupon_uuid
         """
     if target == TransactionTargetEnum.Shop:
         sql += "WHERE T.shop_uuid = (SELECT shop_uuid FROM Shop WHERE account_uuid = %s)"
@@ -79,15 +88,11 @@ async def get_transaction_list(
         i = 0
         while i < len(results):
             curr = Transaction(
-                transaction_uuid=results[i]["transaction_uuid"],
-                account_uuid=results[i]["account_uuid"],
-                shop_uuid=results[i]["shop_uuid"],
-                coupon_code=results[i]["coupon_code"],
-                receive_time=results[i]["receive_time"],
-                status=results[i]["status"],
                 total_price=0,
-                products=TransactionProductLogList(transaction_product_logs=[])
+                products=TransactionProductLogList(transaction_product_logs=[]),
+                **results[i]
             )
+            curr.discount = curr.discount / 100 if curr.discount is not None else 1
             while i < len(results) and results[i]["transaction_uuid"] == curr.transaction_uuid:
                 curr.products.transaction_product_logs.append(
                     TransactionProductLog(
@@ -96,7 +101,7 @@ async def get_transaction_list(
                         price=results[i]["price"]
                     )
                 )
-                curr.total_price += results[i]["price"] * results[i]["quantity"]
+                curr.total_price += results[i]["price"] * results[i]["quantity"] * curr.discount
                 i += 1
             result.transactions.append(curr)
         return result
@@ -207,12 +212,13 @@ async def create_transaction(
 
     sql = """
     INSERT INTO 
-    Transaction (transaction_uuid, account_uuid, coupon_code, receive_time, status) 
-    VALUES (%s, %s, %s, %s, %s)
+    Transaction (transaction_uuid, account_uuid, shop_uuid,coupon_code, receive_time, status) 
+    VALUES (%s, %s,%s,%s, %s, %s)
     """
     transaction_values = (
         transaction_uuid,
         account_uuid,
+        transaction.shop_uuid,
         transaction.coupon_code,
         transaction.receive_time,
         transaction.status.value
