@@ -6,7 +6,9 @@ from starlette import status
 
 from app.model.account import Account
 from app.model.general import ErrorModel
-from app.model.transaction import TransactionList, Transaction, TransactionCreate, TransactionUpdate
+from app.model.transaction import (TransactionList, Transaction, TransactionCreate, TransactionUpdate,
+                                   TransactionTargetEnum, TransactionProductLog, TransactionProductLogList,
+                                   )
 from app.router.shop import get_shop_by_account
 from app.utils.auth import get_current_active_user, if_shop_owns_product
 from app.utils.db_process import get_all_results, execute_query
@@ -36,29 +38,72 @@ async def get_transaction_list(
         account: Annotated[
             Account,
             Depends(get_current_active_user)],
-        account_uuid: str | None = None
+        account_uuid: str | None = None,
+        target: TransactionTargetEnum = TransactionTargetEnum.Account
 ):
     """
     Get transaction list of current logged in account.
     :param account:  Current logged in account
     :param account_uuid: Admins may provide an account_uuid to get transaction list of that account.
+    :param target:  (TransactionTargetEnum): [description]. Defaults to TransactionTargetEnum.Account.
+         Valid Value: {Account, Shop}
     :return: TransactionList
     :raises HTTPException 401: Unauthorized, HTTPException 403: Forbidden,    HTTPException 404: Not found
     """
-    sql = "SELECT * FROM Transaction WHERE account_uuid = %s"
-
-    if account.role == 1 and account_uuid:
-        result = get_all_results(sql, (account_uuid,))
-    else:
-        result = get_all_results(sql, (account.account_uuid,))
-
-    if result:
-        for transaction in result:
-            transaction["products"] = get_all_results(
-                "SELECT * FROM TransactionProductLog WHERE transaction_uuid = %s",
-                (transaction["transaction_uuid"],)
+    if account_uuid:
+        if account.role != 1:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permission denied",
             )
-        return {"transactions": result}
+    else:
+        account_uuid = account.account_uuid
+
+    sql = f"""
+        SELECT T.*, TPL.product_uuid, TPL.quantity, P.price
+        FROM 
+        Transaction T 
+        left join NFT.TransactionProductLog TPL 
+        on T.transaction_uuid = TPL.transaction_uuid 
+        left join NFT.Product P 
+        on TPL.product_uuid = P.product_uuid
+        """
+    if target == TransactionTargetEnum.Shop:
+        sql += "WHERE T.shop_uuid = (SELECT shop_uuid FROM Shop WHERE account_uuid = %s)"
+    else:
+        sql += "WHERE T.account_uuid = %s"
+
+    results = get_all_results(sql, (account_uuid,))
+    result = TransactionList(transactions=[])
+    if results:
+        i = 0
+        while i < len(results):
+            curr = Transaction(
+                transaction_uuid=results[i]["transaction_uuid"],
+                account_uuid=results[i]["account_uuid"],
+                shop_uuid=results[i]["shop_uuid"],
+                coupon_code=results[i]["coupon_code"],
+                receive_time=results[i]["receive_time"],
+                status=results[i]["status"],
+                total_price=0,
+                products=TransactionProductLogList(transaction_product_logs=[])
+            )
+            while i < len(results) and results[i]["transaction_uuid"] == curr.transaction_uuid:
+                curr.products.transaction_product_logs.append(
+                    TransactionProductLog(
+                        product_uuid=results[i]["product_uuid"],
+                        quantity=results[i]["quantity"],
+                        price=results[i]["price"]
+                    )
+                )
+                curr.total_price += results[i]["price"] * results[i]["quantity"]
+                i += 1
+            result.transactions.append(curr)
+        return result
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Transaction not found",
+    )
 
 @router.get(
     path="/all",
