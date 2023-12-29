@@ -3,6 +3,10 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+class TransactionTargetEnum(str, Enum):
+    Account = "Account"
+    Shop = "Shop"
+
 class TransactionStatusEnum(str, Enum):
     Ordered = "Ordered"
     Delivering = "Delivering"
@@ -12,6 +16,7 @@ class TransactionStatusEnum(str, Enum):
 class TransactionProductLog(BaseModel):
     product_uuid: str
     quantity: int
+    price: int
 
 class TransactionProductLogList(BaseModel):
     transaction_product_logs: list[TransactionProductLog]
@@ -25,6 +30,7 @@ class Transaction(BaseModel):
     status: TransactionStatusEnum
     order_time: datetime.datetime | None = None
     products: TransactionProductLogList
+    total_price: int
 
 class TransactionCreate(BaseModel):
     account_uuid: str | None = None
