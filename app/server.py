@@ -13,9 +13,14 @@ app = FastAPI(
     openapi_url=Settings["api_prefix"],
 )
 
+origins = [
+    "http://localhost:5501",
+    "http://localhost:63342",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
