@@ -14,7 +14,9 @@ class TransactionStatusEnum(str, Enum):
     Cancelled = "Cancelled"
 
 class TransactionProductLog(BaseModel):
+    product_name: str | None = None
     product_uuid: str
+    product_description: str | None = None
     quantity: int
     price: int | None = None
 
@@ -30,7 +32,7 @@ class Transaction(BaseModel):
     status: TransactionStatusEnum
     order_time: datetime.datetime | None = None
     products: TransactionProductLogList
-    total_price: int | None = None
+    total_price: float | None = None
 
 class TransactionCreate(BaseModel):
     shop_uuid: str

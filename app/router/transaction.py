@@ -7,11 +7,12 @@ from starlette import status
 from app.model.account import Account
 from app.model.general import ErrorModel
 from app.model.transaction import (TransactionList, Transaction, TransactionCreate, TransactionUpdate,
-                                   TransactionTargetEnum, TransactionProductLog, TransactionProductLogList,
+                                   TransactionTargetEnum,
                                    )
 from app.router.shop import get_shop_by_account
 from app.utils.auth import get_current_active_user, if_shop_owns_product
 from app.utils.db_process import get_all_results, execute_query
+from app.utils.transaction_formatter import get_transactions
 
 router = APIRouter(
     tags=["account", "transaction", "product", "coupon", "shop"]
@@ -80,35 +81,9 @@ async def get_transaction_list(
     if target == TransactionTargetEnum.Shop:
         sql += "WHERE T.shop_uuid = (SELECT shop_uuid FROM Shop WHERE account_uuid = %s)"
     else:
-        sql += "WHERE T.account_uuid = %s"
+        sql += f"WHERE T.account_uuid = '{account_uuid}'"
 
-    results = get_all_results(sql, (account_uuid,))
-    result = TransactionList(transactions=[])
-    if results:
-        i = 0
-        while i < len(results):
-            curr = Transaction(
-                total_price=0,
-                products=TransactionProductLogList(transaction_product_logs=[]),
-                **results[i]
-            )
-            curr.discount = curr.discount / 100 if curr.discount is not None else 1
-            while i < len(results) and results[i]["transaction_uuid"] == curr.transaction_uuid:
-                curr.products.transaction_product_logs.append(
-                    TransactionProductLog(
-                        product_uuid=results[i]["product_uuid"],
-                        quantity=results[i]["quantity"],
-                        price=results[i]["price"]
-                    )
-                )
-                curr.total_price += results[i]["price"] * results[i]["quantity"] * curr.discount
-                i += 1
-            result.transactions.append(curr)
-        return result
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Transaction not found",
-    )
+    return get_transactions(sql)
 
 @router.get(
     path="/all",
@@ -144,17 +119,26 @@ async def get_all_transaction_list(
             detail="Permission denied",
         )
 
-    sql = "SELECT * FROM Transaction"
+    sql = f"""
+        SELECT T.transaction_uuid,
+           T.account_uuid,
+           T.shop_uuid,
+           T.receive_time,
+           T.status,
+           T.order_time,
+           C.discount,
+           TPL.product_uuid,
+           TPL.quantity,
+           P.name,
+           P.price,
+           P.description
+        from Transaction T
+         left join NFT.TransactionProductLog TPL on T.transaction_uuid = TPL.transaction_uuid
+         left join NFT.Product P on TPL.product_uuid = P.product_uuid
+         left join Coupon C on T.coupon_uuid = C.coupon_uuid
+        """
 
-    result = get_all_results(sql)
-
-    if result:
-        for transaction in result:
-            transaction["products"] = get_all_results(
-                "SELECT * FROM TransactionProductLog WHERE transaction_uuid = %s",
-                (transaction["transaction_uuid"],)
-            )
-        return {"transactions": result}
+    return get_transactions(sql)
 
 @router.post(
     path="/",
