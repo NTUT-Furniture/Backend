@@ -16,7 +16,7 @@ class TransactionStatusEnum(str, Enum):
 class TransactionProductLog(BaseModel):
     product_uuid: str
     quantity: int
-    price: int
+    price: int | None = None
 
 class TransactionProductLogList(BaseModel):
     transaction_product_logs: list[TransactionProductLog]
@@ -30,10 +30,9 @@ class Transaction(BaseModel):
     status: TransactionStatusEnum
     order_time: datetime.datetime | None = None
     products: TransactionProductLogList
-    total_price: int
+    total_price: int | None = None
 
 class TransactionCreate(BaseModel):
-    account_uuid: str | None = None
     shop_uuid: str
     coupon_code: str | None = None
     receive_time: datetime.datetime | None = None
