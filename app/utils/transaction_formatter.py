@@ -4,7 +4,25 @@ from starlette import status
 from app.model.transaction import TransactionList, Transaction, TransactionProductLogList, TransactionProductLog
 from app.utils.db_process import get_all_results
 
-def get_transactions(sql: str) -> TransactionList:
+def get_transactions(condition: str = "") -> TransactionList:
+    sql = f"""
+        SELECT T.transaction_uuid,
+           T.account_uuid,
+           T.shop_uuid,
+           T.receive_time,
+           T.status,
+           T.order_time,
+           C.discount,
+           TPL.product_uuid,
+           TPL.quantity,
+           P.name,
+           P.price,
+           P.description
+        from Transaction T
+         left join NFT.TransactionProductLog TPL on T.transaction_uuid = TPL.transaction_uuid
+         left join NFT.Product P on TPL.product_uuid = P.product_uuid
+         left join Coupon C on T.coupon_uuid = C.coupon_uuid
+        """ + condition
     results = get_all_results(sql)
     result = TransactionList(transactions=[])
     if results:

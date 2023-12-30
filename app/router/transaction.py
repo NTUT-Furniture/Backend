@@ -60,30 +60,12 @@ async def get_transaction_list(
     else:
         account_uuid = account.account_uuid
 
-    sql = f"""
-        SELECT T.transaction_uuid,
-           T.account_uuid,
-           T.shop_uuid,
-           T.receive_time,
-           T.status,
-           T.order_time,
-           C.discount,
-           TPL.product_uuid,
-           TPL.quantity,
-           P.name,
-           P.price,
-           P.description
-        from Transaction T
-         left join NFT.TransactionProductLog TPL on T.transaction_uuid = TPL.transaction_uuid
-         left join NFT.Product P on TPL.product_uuid = P.product_uuid
-         left join Coupon C on T.coupon_uuid = C.coupon_uuid
-        """
     if target == TransactionTargetEnum.Shop:
-        sql += "WHERE T.shop_uuid = (SELECT shop_uuid FROM Shop WHERE account_uuid = %s)"
+        condition = f"WHERE T.shop_uuid = (SELECT shop_uuid FROM Shop WHERE account_uuid = '{account_uuid}')"
     else:
-        sql += f"WHERE T.account_uuid = '{account_uuid}'"
+        condition = f"WHERE T.account_uuid = '{account_uuid}'"
 
-    return get_transactions(sql)
+    return get_transactions(condition)
 
 @router.get(
     path="/all",
@@ -119,26 +101,7 @@ async def get_all_transaction_list(
             detail="Permission denied",
         )
 
-    sql = f"""
-        SELECT T.transaction_uuid,
-           T.account_uuid,
-           T.shop_uuid,
-           T.receive_time,
-           T.status,
-           T.order_time,
-           C.discount,
-           TPL.product_uuid,
-           TPL.quantity,
-           P.name,
-           P.price,
-           P.description
-        from Transaction T
-         left join NFT.TransactionProductLog TPL on T.transaction_uuid = TPL.transaction_uuid
-         left join NFT.Product P on TPL.product_uuid = P.product_uuid
-         left join Coupon C on T.coupon_uuid = C.coupon_uuid
-        """
-
-    return get_transactions(sql)
+    return get_transactions()
 
 @router.post(
     path="/",
