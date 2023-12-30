@@ -20,6 +20,7 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY app /code/app
+COPY upload_images /code/upload_images
 
 ENV DB_HOST="mysql"
 ENV DB_USER="backend"
