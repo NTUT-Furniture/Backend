@@ -180,7 +180,7 @@ async def create_transaction(
         transaction: TransactionCreate,
 ):
     """
-    Create a transaction. Admins may provide an account_uuid to create a transaction for that account.
+    Create a transaction.
     :param account: Current logged in account
     :param transaction: TransactionCreate
     :return: Transaction
@@ -192,8 +192,10 @@ async def create_transaction(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No product in transaction",
         )
+
     transaction_uuid = str(uuid.uuid4())
     values: list[list] = []
+
     for product in transaction.products.transaction_product_logs:
         if not await if_shop_owns_product(shop_uuid=transaction.shop_uuid, product_uuid=product.product_uuid):
             raise HTTPException(
@@ -208,12 +210,14 @@ async def create_transaction(
             ]
         )
 
-    account_uuid = transaction.account_uuid if transaction.account_uuid and account.role == 1 else account.account_uuid
+    account_uuid = account.account_uuid
 
     sql = """
     INSERT INTO 
-    Transaction (transaction_uuid, account_uuid, shop_uuid,coupon_code, receive_time, status) 
-    VALUES (%s, %s,%s,%s, %s, %s)
+    Transaction (transaction_uuid, account_uuid, shop_uuid,coupon_uuid, receive_time, status) 
+    VALUES (%s, %s,%s,
+    (SELECT coupon_uuid FROM Coupon WHERE coupon_code = %s)
+    , %s, %s)
     """
     transaction_values = (
         transaction_uuid,
@@ -225,23 +229,38 @@ async def create_transaction(
     )
 
     result: bool = execute_query(sql, transaction_values)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Transaction failed",
+        )
 
-    sql = """
-        INSERT INTO 
-        TransactionProductLog (transaction_uuid, product_uuid, quantity) 
-        VALUES (%s, %s, %s)
-        """
-    for value in values:
-        execute_query(sql, tuple(value))
+    try:
+        sql = """
+            INSERT INTO 
+            TransactionProductLog (transaction_uuid, product_uuid, quantity) 
+            VALUES   """
 
-        return Transaction(
-            transaction_uuid=transaction_uuid,
-            account_uuid=account_uuid,
+        for value in values:
+            sql += f"('{value[0]}', '{value[1]}', {value[2]}),"
+        sql = sql[:-1]
+
+        execute_query(sql)
+        return TransactionCreate(
             shop_uuid=transaction.shop_uuid,
-            coupon_code=transaction.coupon_code,
             receive_time=transaction.receive_time,
             status=transaction.status,
-            products=transaction.products
+            products=transaction.products,
+            coupon_code=transaction.coupon_code
+        )
+    except Exception as e:
+        sql = "DELETE FROM NFT.Transaction WHERE transaction_uuid LIKE %s ESCAPE '#'"
+        execute_query(sql, (transaction_uuid,))
+        sql = "DELETE FROM NFT.TransactionProductLog WHERE transaction_uuid LIKE %s ESCAPE '#'"
+        execute_query(sql, (transaction_uuid,))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Transaction failed: " + str(e)
         )
 
 @router.put(
