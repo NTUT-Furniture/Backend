@@ -6,7 +6,9 @@ create table TransactionProductLog
     constraint TransactionProductLog_ibfk_1
         foreign key (transaction_uuid) references Transaction (transaction_uuid),
     constraint TransactionProductLog_ibfk_2
-        foreign key (product_uuid) references Product (product_uuid)
+        foreign key (product_uuid) references Product (product_uuid),
+    constraint Check_ProductQuantity
+        check (quantity > 0)
 );
 
 INSERT INTO NFT.TransactionProductLog (transaction_uuid, product_uuid, quantity) VALUES ('e31b3d02-2995-4e2c-9481-93a63403c7af', '5e678901-8998-11ee-bb92-42010aae0002', 10);
