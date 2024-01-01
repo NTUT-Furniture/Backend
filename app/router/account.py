@@ -51,18 +51,8 @@ async def get_all_accounts(
 ):
     if account.role == 1:
         sql = """
-            SELECT 
-                account_uuid,
-                name,
-                email,
-                phone,
-                credit_card,
-                birthday,
-                address,
-                is_active,
-                role,
-                update_time
-            FROM Account;
+            SELECT A.*, S.shop_uuid, S.name as shop_name, S.is_active as shop_is_active
+            FROM `Account` A left join `Shop` S on A.account_uuid = S.account_uuid;
         """
         result: dict = get_all_results(sql)
         if result:
