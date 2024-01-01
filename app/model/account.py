@@ -15,6 +15,9 @@ class Account(BaseModel):
     is_active: int | None = 1
     role: int | None = 0
     update_time: datetime.datetime | None = None
+    shop_uuid: str | None = None
+    shop_name: str | None = None
+    shop_is_active: int | None = None
 
 class AccountList(BaseModel):
     accounts: list[Account]
