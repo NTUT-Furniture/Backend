@@ -231,13 +231,11 @@ async def update_transaction(
         account: Annotated[
             Account,
             Depends(get_current_active_user)],
-        transaction_uuid: str,
-        transaction: TransactionUpdate,
+        transaction: TransactionUpdate = Depends(TransactionUpdate.as_form)
 ):
     """
     Update a transaction. Admins may provide an account_uuid to update a transaction for that account.
     :param account: Current logged in account
-    :param transaction_uuid: Transaction uuid
     :param transaction: TransactionUpdate
     :return: TransactionUpdate
 
@@ -245,7 +243,7 @@ async def update_transaction(
     """
 
     sql = "SELECT * FROM Transaction WHERE transaction_uuid = %s"
-    result: Dict = get_all_results(sql, (transaction_uuid,))
+    result: Dict = get_all_results(sql, (transaction.transaction_uuid,))
     if not result:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -265,12 +263,13 @@ async def update_transaction(
     values = (
         transaction.receive_time,
         transaction.status,
-        transaction_uuid,
+        transaction.transaction_uuid,
     )
 
     result: bool = execute_query(sql, values)
     if result:
         return TransactionUpdate(
             receive_time=transaction.receive_time,
-            status=transaction.status
+            status=transaction.status,
+            transaction_uuid=transaction.transaction_uuid
         )

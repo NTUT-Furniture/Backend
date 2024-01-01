@@ -3,6 +3,8 @@ from enum import Enum
 
 from pydantic import BaseModel
 
+from app.utils.as_form import as_form
+
 class TransactionTargetEnum(str, Enum):
     Account = "Account"
     Shop = "Shop"
@@ -41,7 +43,9 @@ class TransactionCreate(BaseModel):
     status: TransactionStatusEnum
     products: TransactionProductLogList
 
+@as_form
 class TransactionUpdate(BaseModel):
+    transaction_uuid: str
     receive_time: datetime.datetime | None = None
     status: TransactionStatusEnum | None = None
 
