@@ -193,6 +193,19 @@ async def create_transaction(
         sql = sql[:-1]
 
         execute_query(sql)
+
+        sql = f"""
+            UPDATE Product
+            JOIN (
+                SELECT TPL.product_uuid, SUM(TPL.quantity) as total_quantity
+                FROM TransactionProductLog TPL
+                WHERE TPL.transaction_uuid = '{transaction_uuid}'
+                GROUP BY TPL.product_uuid
+            ) AS ProductQuantities ON Product.product_uuid = ProductQuantities.product_uuid
+            SET Product.stock = Product.stock - ProductQuantities.total_quantity
+            """
+        execute_query(sql)
+
         return TransactionCreate(
             shop_uuid=transaction.shop_uuid,
             receive_time=transaction.receive_time,
