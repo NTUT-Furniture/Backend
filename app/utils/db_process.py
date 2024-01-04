@@ -1,6 +1,7 @@
 import os
 from typing import Final
 from typing import Union, Tuple, Dict, Optional
+import time
 
 import mysql.connector
 from dotenv import load_dotenv
@@ -18,8 +19,24 @@ pool_config: Final = {
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_DATABASE"),
 }
+def database_not_ready_yet(error, checking_interval_seconds):
+    print('Database initialization has not yet finished. Retrying over {0} second(s). The encountered error was: {1}.'
+          .format(checking_interval_seconds,
+                  repr(error)))
+    time.sleep(checking_interval_seconds)
 
-cnx_pool = pooling.MySQLConnectionPool(**pool_config)
+print('Initializing database connection pool.')
+not_ready = False
+retry_count = 0
+while not not_ready or retry_count > 10:
+    try:
+        cnx_pool = pooling.MySQLConnectionPool(**pool_config)
+        not_ready = True
+    except Exception as err:
+        database_not_ready_yet(err, 5)
+    finally:
+        print('retry_count: {}'.format(retry_count))
+        retry_count += 1
 
 def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Union[Dict, bool]:
     connection = None

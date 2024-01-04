@@ -20,23 +20,21 @@ python3 main.py
 
 For frontend development, you can run the backend and Database with Docker. To do so, follow the steps below:
 
-   ```bash
-   docker-compose  -f docker-compose-ALL.yml up -d
-   ```
+```bash
+docker compose up -d
+```
 
 For backend development, you can run the backend with Docker. To do so, follow the steps below:
 
-   ```bash
-   docker-compose -f docker-compose-DB.yml up -d
-   ```
+```bash
+docker-compose -f docker-compose-DB.yml up -d
+```
 
-### clean all
+### clean docker compose
 
-make sure no container is running
-
-   ```bash
-   docker system prune -a
-   ```
+```bash
+docker compose down
+```
 
 ### PyCharm Hacks
 
