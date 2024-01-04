@@ -12,9 +12,3 @@ services:
       - ./sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
-    networks:
-      - mynetwork
-
-networks:
-  mynetwork:
-    driver: bridge

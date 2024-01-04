@@ -12,8 +12,10 @@ services:
       - ./sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
-    networks:
-      - NFT_network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
 
   backend:
     build:
@@ -23,8 +25,5 @@ services:
       - "8000:8000"
     depends_on:
       - mysql
-    networks:
-      - NFT_network
-networks:
-  NFT_network:
-    driver: bridge
+    links:
+      - mysql
