@@ -19,25 +19,8 @@ pool_config: Final = {
     "password": os.getenv("DB_PASSWORD"),
     "database": os.getenv("DB_DATABASE"),
 }
-def database_not_ready_yet(error, checking_interval_seconds):
-    print('Database initialization has not yet finished. Retrying over {0} second(s). The encountered error was: {1}.'
-          .format(checking_interval_seconds,
-                  repr(error)))
-    time.sleep(checking_interval_seconds)
 
-print('Initializing database connection pool.')
-not_ready = False
-retry_count = 0
-while not not_ready or retry_count > 10:
-    try:
-        cnx_pool = pooling.MySQLConnectionPool(**pool_config)
-        not_ready = True
-    except Exception as err:
-        database_not_ready_yet(err, 5)
-    finally:
-        print('retry_count: {}'.format(retry_count))
-        retry_count += 1
-
+cnx_pool = pooling.MySQLConnectionPool(**pool_config)
 def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Union[Dict, bool]:
     connection = None
     cursor = None
@@ -53,7 +36,7 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
                 result = [dict(zip(column_names, row)) for row in result]
                 [result_row.update(
                     {"update_time": result_row["update_time"].strftime("%Y-%m-%d %H:%M:%S")}
-                    ) if "update_time" in result_row else result_row for result_row in result]
+                ) if "update_time" in result_row else result_row for result_row in result]
         else:
             result = count != 0
             connection.commit()
@@ -71,7 +54,6 @@ def execute_sql(sql, param: Optional[Tuple] = None, fetch: bool = False) -> Unio
             cursor.close()
         if connection is not None:
             connection.close()
-
     return result
 
 def get_all_results(sql: str, param: Optional[Tuple] = None) -> Union[Dict, bool]:
