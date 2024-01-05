@@ -18,9 +18,11 @@ WORKDIR /code
 COPY ./requirements.txt /code/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN apt update && apt install netcat -y
 
 COPY app /code/app
 COPY upload_images /code/upload_images
+COPY wait.sh /wait.sh
 
 ENV DB_HOST="mysql"
 ENV DB_USER="backend"
@@ -34,4 +36,4 @@ ENV ALGORITHM="HS256"
 ENV ACCESS_TOKEN_EXPIRE_MINUTES="30"
 ENV SECRET_KEY="b97a1bb26f8d37c3964b56b63b02463675c0d5e39ec149bfcbb6299a615d2b0a"
 
-CMD ["sh", "-c", "uvicorn app.server:app --host $HOST --port $PORT --workers $WORKERS"]
+CMD ["sh", "-c", "/wait.sh && uvicorn app.server:app --host $HOST --port $PORT --workers $WORKERS"]
