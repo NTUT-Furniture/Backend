@@ -35,7 +35,9 @@ docker-compose -f docker-compose-DB.yml up -d
 ```bash
 docker compose down
 ```
-
+```warning
+note that backend images shall be removed manually otherwise your container will use the old image
+```
 ### PyCharm Hacks
 
 ~~For GUI freak fellows~~, you can run the backend with PyCharm's Run/Debug Configuration . To do so, follow the steps
