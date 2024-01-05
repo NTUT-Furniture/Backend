@@ -14,8 +14,9 @@ services:
       - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   backend:
     build:
@@ -27,3 +28,8 @@ services:
       - mysql
     links:
       - mysql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
