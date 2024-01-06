@@ -7,37 +7,28 @@ python3 -m venv venv
 venv/Scripts/activate
 ```
 
-## run uvicorn server
-
-```bash
-pip install -r requirements.txt
-python3 main.py
-```
-
 ## Docker
 
-### run
-
-For frontend development, you can run the backend and Database with Docker. To do so, follow the steps below:
-
-```bash
+pull the image if it's not present, and run as services in detach mode
+```
 docker compose up -d
 ```
 
-For backend development, you can run the backend with Docker. To do so, follow the steps below:
-
-```bash
-docker-compose -f docker-compose-DB.yml up -d
+stop the services
+```
+docker compose stop
 ```
 
-### clean docker compose
+start the services
+```
+docker compose start
+```
 
-```bash
+remove the containers
+```
 docker compose down
 ```
-```warning
-note that backend images shall be removed manually otherwise your container will use the old image
-```
+
 ### PyCharm Hacks
 
 ~~For GUI freak fellows~~, you can run the backend with PyCharm's Run/Debug Configuration . To do so, follow the steps
