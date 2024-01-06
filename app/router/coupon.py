@@ -27,7 +27,7 @@ router = APIRouter(
 async def get_coupons(
 ):
     sql = """
-        SELECT * FROM `Coupon` WHERE expire_time > convert_tz(now(), 'UTC', 'Asia/Taipei')
+        SELECT * FROM `Coupon` WHERE expire_time > now()
     """
     result = get_all_results(sql)
     if result:

@@ -4,6 +4,7 @@ services:
   mysql:
     image: mysql:latest
     environment:
+      TZ: "Asia/Taipei"
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: NFT
       MYSQL_USER: backend
@@ -19,6 +20,8 @@ services:
       retries: 3
 
   backend:
+    environment:
+      TZ: "Asia/Taipei"
     build:
       context: .
       dockerfile: dockerFile-backend
