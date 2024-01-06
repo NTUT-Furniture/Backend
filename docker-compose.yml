@@ -20,14 +20,36 @@ services:
       retries: 3
 
   backend:
+    image: python:3.10.11-slim-buster
+    working_dir: /code
+    volumes:
+      - ./app:/code/app
+      - ./requirements.txt:/code/requirements.txt
+      - ./upload_images:/code/upload_images
     environment:
       TZ: "Asia/Taipei"
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: backend
+      DB_PASSWORD: backend
+      DB_DATABASE: NFT
+      HOST: 0.0.0.0
+      PORT: 8000
+      WORKERS: 4
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      SECRET_KEY: b97a1bb26f8d37c3964b56b63b02463675c0d5e39ec149bfcbb6299a615d2b0a
     build:
       context: .
-      dockerfile: dockerFile-backend
     ports:
       - "8000:8000"
     depends_on:
       - mysql
     links:
       - mysql
+    command:
+      - sh
+      - -c
+      - |
+        pip install --no-cache-dir --upgrade -r requirements.txt
+        uvicorn app.server:app --host $$HOST --port $$PORT --workers $$WORKERS
