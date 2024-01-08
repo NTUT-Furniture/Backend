@@ -1,7 +1,6 @@
+import datetime
 import uuid
-from datetime import datetime
 from typing import Annotated, Dict
-
 
 from fastapi import APIRouter, Depends, status, HTTPException
 
@@ -48,7 +47,7 @@ async def get_product(
 
 @router.post(
     "/", tags=["create"], responses={
-        status.HTTP_200_OK: {
+        status.HTTP_201_CREATED: {
             "model": ExecuteProductResponse
         },
         status.HTTP_404_NOT_FOUND: {
@@ -70,7 +69,9 @@ async def create_product(
     """
     result = execute_query(sql, (product_id, shop_uuid, *product_form.values()))
     if result:
-        return CreateProductForm(**product_form)
+        return ExecuteProductResponse(
+            **product_form, product_uuid=product_id, shop_uuid=shop_uuid, update_time=datetime.datetime.now()
+        )
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Create Product failed."
