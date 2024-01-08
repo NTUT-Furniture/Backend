@@ -54,12 +54,10 @@ services:
         pip install --no-cache-dir --upgrade -r requirements.txt
         uvicorn app.server:app --host $$HOST --port $$PORT --workers $$WORKERS
 
-
   frontend:
     image: httpd:2.4
     volumes:
-      - ./app:/code/app
-      - ../Frontend:/usr/local/apache2/htdocs/
+      - ./Frontend:/usr/local/apache2/htdocs/
     ports:
       - "80:80"
     links:
