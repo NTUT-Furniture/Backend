@@ -58,6 +58,7 @@ services:
     image: httpd:2.4
     volumes:
       - ./Frontend:/usr/local/apache2/htdocs/
+      - ./my-httpd.conf:/usr/local/apache2/conf/httpd.conf
     ports:
       - "80:80"
     links:
