@@ -39,8 +39,6 @@ services:
       ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
       SECRET_KEY: b97a1bb26f8d37c3964b56b63b02463675c0d5e39ec149bfcbb6299a615d2b0a
-    build:
-      context: .
     ports:
       - "8000:8000"
     depends_on:
