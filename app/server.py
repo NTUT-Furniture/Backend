@@ -16,6 +16,8 @@ app = FastAPI(
 origins = [
     "http://localhost:5501",
     "http://localhost:63342",
+    "http://nft.noobdy.com",
+    "https://nft.noobdy.com",
 ]
 
 app.add_middleware(
